@@ -1,0 +1,179 @@
+/* Vestíbulo: un pasillo a oscuras con luz cálida bajo las puertas */
+:root {
+  --bg: #0d0c0b;
+  --surface: #161412;
+  --fg: #f1ebe2;
+  --muted: #a39b8f;
+  --accent: #ffb347;
+  --accent-ink: #1a1206;
+  --line: rgb(241 235 226 / 0.12);
+  --font-display: 'Unbounded', system-ui, sans-serif;
+  --font-ui: 'IBM Plex Mono', ui-monospace, monospace;
+  color-scheme: dark;
+}
+
+/* Cada sala redefine las mismas variables con su propia estética */
+.theme-oficina {
+  --bg: #050805;
+  --surface: #0b120c;
+  --fg: #8dffb3;
+  --muted: #5fbf80;
+  --accent: #39ff7a;
+  --accent-ink: #031006;
+  --line: rgb(57 255 122 / 0.25);
+  --font-display: 'VT323', ui-monospace, monospace;
+  --font-ui: 'VT323', ui-monospace, monospace;
+  font-size: clamp(1.05rem, 3.4vw, 1.3rem);
+}
+
+.theme-observatorio {
+  --bg: #0a0f24;
+  --surface: #121a3a;
+  --fg: #efe6d2;
+  --muted: #b3ab98;
+  --accent: #e0b46a;
+  --accent-ink: #1a1206;
+  --line: rgb(224 180 106 / 0.28);
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-ui: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+.theme-radio {
+  --bg: #170d09;
+  --surface: #24140d;
+  --fg: #f6e3c8;
+  --muted: #c4a88a;
+  --accent: #ff6a3d;
+  --accent-ink: #1a0904;
+  --line: rgb(255 106 61 / 0.28);
+  --font-display: 'Bungee', system-ui, sans-serif;
+  --font-ui: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+.theme-laboratorio {
+  --bg: #eaf1ee;
+  --surface: #ffffff;
+  --fg: #0f2a26;
+  --muted: #4b6560;
+  --accent: #00806a;
+  --accent-ink: #ffffff;
+  --line: rgb(15 42 38 / 0.16);
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-ui: 'Space Grotesk', system-ui, sans-serif;
+  color-scheme: light;
+}
+
+.theme-archivo {
+  --bg: #efe3c8;
+  --surface: #f7eedb;
+  --fg: #33230f;
+  --muted: #6b5537;
+  --accent: #8e2b17;
+  --accent-ink: #f7eedb;
+  --line: rgb(51 35 15 / 0.2);
+  --font-display: 'IM Fell English', Georgia, serif;
+  --font-ui: 'IM Fell English', Georgia, serif;
+  color-scheme: light;
+  font-size: 1.12rem;
+}
+
+.theme-maquina {
+  --bg: #000000;
+  --surface: #0c0c0c;
+  --fg: #f4f4f4;
+  --muted: #a0a0a0;
+  --accent: #ff2bd6;
+  --accent-ink: #000000;
+  --line: rgb(255 255 255 / 0.18);
+  --font-display: 'Unbounded', system-ui, sans-serif;
+  --font-ui: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* Cambio de pantalla: la nueva entra mientras la anterior se apaga */
+::view-transition-old(root) {
+  animation: 280ms ease-in both fade-out;
+}
+::view-transition-new(root) {
+  animation: 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both door-in;
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+    filter: blur(6px);
+  }
+}
+@keyframes door-in {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+    filter: blur(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Al imprimir solo interesa la escena, no la interfaz del juego */
+@media print {
+  .hud,
+  .inventory,
+  .hints {
+    display: none !important;
+  }
+}
