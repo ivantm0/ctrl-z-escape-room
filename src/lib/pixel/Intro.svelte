@@ -3,7 +3,7 @@
 
   // Intro: la habitación de Leo, la consola, el cartucho sin nombre y el «salto» dentro del juego
   type Slide = { scene: string; text: string };
-  let { onfinish, world = 1 }: { onfinish: () => void; world?: 1 | 2 | 3 | 4 } = $props();
+  let { onfinish, world = 1 }: { onfinish: () => void; world?: 1 | 2 | 3 | 4 | 'bastidores' } = $props();
 
   const WORLD1: Slide[] = [
     { scene: 'room', text: 'Son las 3:07 de la madrugada. Leo debería estar durmiendo.' },
@@ -24,7 +24,12 @@
     { scene: 'tear', text: 'El portal de la torre se rompe a mitad de viaje. Leo cae por un hueco entre los píxeles, donde los colores no casan.' },
     { scene: 'error', text: 'MUNDO 4 · GLITCH. El juego se está rompiendo. Las paredes mienten, los reflejos desobedecen… y alguien escribe con ceros en vez de oes.' },
   ];
-  const slides = $derived(world === 1 ? WORLD1 : world === 2 ? WORLD2 : world === 3 ? WORLD3 : WORLD4);
+  const BASTIDORES: Slide[] = [
+    { scene: 'room', text: 'Leo ha vuelto a casa. Son las 3:08 y la consola sigue caliente encima de la cama.' },
+    { scene: 'stuck', text: 'Quiere ver su partida una última vez. La pantalla dice «CARGANDO… 99 %». Y de ahí no pasa.' },
+    { scene: 'behind', text: 'La consola tira de él otra vez. Pero ahora Leo no cae en ningún mundo: cae DETRÁS del juego, donde nadie debería mirar.' },
+  ];
+  const slides = $derived(world === 'bastidores' ? BASTIDORES : world === 1 ? WORLD1 : world === 2 ? WORLD2 : world === 3 ? WORLD3 : WORLD4);
 
   let i = $state(0);
   let typed = $state('');
@@ -107,6 +112,23 @@
       <div class="clockscene">
         <div class="ctower"><div class="cface"><i class="hand h1"></i><i class="hand h2"></i></div></div>
         {#each Array(5) as _, k}<span class="gear" style="--k: {k}">⚙</span>{/each}
+      </div>
+    {:else if slides[i].scene === 'stuck'}
+      <div class="console">
+        <div class="lcd stuck">
+          <p>CARGANDO…</p>
+          <p class="bar"><i></i></p>
+          <p class="blink">99 %</p>
+        </div>
+        <div class="controls"><span class="dp"></span><span class="ab"></span></div>
+      </div>
+    {:else if slides[i].scene === 'behind'}
+      <div class="behind">
+        <p>BIOS DEL CARTUCHO v0.99</p>
+        <p>COMPROBANDO MEMORIA…… <b>FALLO</b></p>
+        <p>BUSCANDO PARTIDA GUARDADA…… <b>FALLO</b></p>
+        <p>JUGADOR 1 DETECTADO DENTRO DEL SISTEMA</p>
+        <p class="blink">_</p>
       </div>
     {:else if slides[i].scene === 'tear'}
       <div class="tear">
@@ -407,6 +429,35 @@
     font-size: 3rem;
     color: #f4c840;
     opacity: 0.6;
+  }
+  /* Entre Bastidores: carga atascada y pantalla de BIOS */
+  .lcd.stuck .bar {
+    width: 80%;
+    height: 0.9rem;
+    margin: 0 auto;
+    border: 2px solid #1d2b1a;
+  }
+  .lcd.stuck .bar i {
+    display: block;
+    width: 99%;
+    height: 100%;
+    background: #1d2b1a;
+  }
+  .behind {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    gap: 1rem;
+    padding: 2rem clamp(1rem, 8vw, 6rem);
+    background: #0000aa;
+    color: #ffffff;
+    font-size: clamp(0.55rem, 1.8vw, 0.8rem);
+    line-height: 1.6;
+  }
+  .behind b {
+    color: #ffff55;
+    font-weight: normal;
   }
   /* Mundo 4: franjas que se desgarran y pantalla de error */
   .tear {

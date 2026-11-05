@@ -28,7 +28,7 @@
     blocked?: boolean;
     label: string;
     attrs?: Record<string, string | number>;
-    theme?: 'w1' | 'w2' | 'w3' | 'w4';
+    theme?: 'w1' | 'w2' | 'w3' | 'w4' | 'b1' | 'b2' | 'b3' | 'b4' | 'b5' | 'b6';
     children?: Snippet;
   } = $props();
 
@@ -151,6 +151,54 @@
     --ink: #05d9e8;
     --key: #ff2a6d;
   }
+  /* Entre Bastidores · pantalla 1: BIOS */
+  .game.b1 {
+    --body: #9a9a9a;
+    --edge: #555555;
+    --paper: #0000aa;
+    --ink: #ffffff;
+    --key: #ffff55;
+  }
+  /* Entre Bastidores · pantalla 2: menú de colores chillones */
+  .game.b2 {
+    --body: #2d1b5a;
+    --edge: #120a24;
+    --paper: #120a24;
+    --ink: #ffd23f;
+    --key: #ff4fa0;
+  }
+  /* Entre Bastidores · pantalla 3: opciones grises */
+  .game.b3 {
+    --body: #5a5e68;
+    --edge: #2a2c33;
+    --paper: #1e2026;
+    --ink: #e0e3ea;
+    --key: #ffd23f;
+  }
+  /* Entre Bastidores · pantalla 4: terminal verde */
+  .game.b4 {
+    --body: #0f2a18;
+    --edge: #000c04;
+    --paper: #000c04;
+    --ink: #00ff66;
+    --key: #ffcc00;
+  }
+  /* Entre Bastidores · pantalla 5: créditos en sepia */
+  .game.b5 {
+    --body: #5c4430;
+    --edge: #2b1d12;
+    --paper: #f3e6c8;
+    --ink: #3d2a1a;
+    --key: #c9a66b;
+  }
+  /* Entre Bastidores · pantalla 6: todo mezclado */
+  .game.b6 {
+    --body: #1d1438;
+    --edge: #ff4fa0;
+    --paper: #05030c;
+    --ink: #3ee0d0;
+    --key: #ffd23f;
+  }
   .screen {
     position: relative;
     width: min(100%, calc((100dvh - 12rem) * 160 / 144), 40rem);
@@ -197,6 +245,42 @@
     background: #08060e;
     color: #f0f0ff;
     box-shadow: inset 0 0 0 3px #ff2a6d;
+  }
+  .b1 .dialog {
+    border-color: #ffffff;
+    background: #0000aa;
+    color: #ffffff;
+    box-shadow: inset 0 0 0 3px #55ffff;
+  }
+  .b2 .dialog {
+    border-color: #ff4fa0;
+    background: #120a24;
+    color: #ffffff;
+    box-shadow: inset 0 0 0 3px #3ee0d0;
+  }
+  .b3 .dialog {
+    border-color: #e0e3ea;
+    background: #1e2026;
+    color: #e0e3ea;
+    box-shadow: inset 0 0 0 3px #4fc3f7;
+  }
+  .b4 .dialog {
+    border-color: #00ff66;
+    background: #000c04;
+    color: #66ffaa;
+    box-shadow: inset 0 0 0 3px #0f4a22;
+  }
+  .b5 .dialog {
+    border-color: #3d2a1a;
+    background: #f3e6c8;
+    color: #3d2a1a;
+    box-shadow: inset 0 0 0 3px #a8875c;
+  }
+  .b6 .dialog {
+    border-color: #3ee0d0;
+    background: #05030c;
+    color: #ffffff;
+    box-shadow: inset 0 0 0 3px #ff4fa0;
   }
   .next {
     position: absolute;

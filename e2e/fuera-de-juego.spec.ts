@@ -36,7 +36,7 @@ const dialog = (page: Page) => page.getByRole('dialog', { name: 'Diálogo' });
 
 test('la portada ofrece Fuera de Juego', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('link', { name: /Fuera de Juego/ }).click();
+  await page.locator('a[href="/fuera-de-juego"]').click();
   await expect(page).toHaveURL(/\/fuera-de-juego$/);
   await expect(page.getByText(/Son las 3:07/)).toBeVisible();
 });

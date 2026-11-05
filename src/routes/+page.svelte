@@ -5,6 +5,7 @@
   import { faraon } from '$lib/faraon/state.svelte';
   import { pixel } from '$lib/pixel/state.svelte';
   import { MAPS } from '$lib/pixel/maps';
+  import { backstage } from '$lib/backstage/state.svelte';
 
   // Miniatura del pueblo del mundo 1: cada casilla, un píxel de su tono
   const SHADE: Record<string, number> = { '#': 3, T: 2, H: 3, h: 1, d: 3, D: 3, W: 1, q: 1, f: 2, ',': 1, o: 2, K: 3, E: 3, c: 3, Q: 2, F: 1, N: 3, m: 3, '@': 3 };
@@ -14,7 +15,11 @@
   onMount(() => {
     faraon.load();
     pixel.load();
+    backstage.load();
   });
+  const backstageStatus = $derived(
+    !backstage.ready || !backstage.s.intro ? 'Nuevo' : backstage.levelDone(6) ? 'Completado: partida guardada' : backstage.levelDone(5) && backstage.s.level === 5 ? 'Pantallas 1 a 5 superadas' : backstage.levelDone(4) && backstage.s.level === 4 ? 'Pantallas 1 a 4 superadas' : backstage.levelDone(3) && backstage.s.level === 3 ? 'Pantallas 1, 2 y 3 superadas' : backstage.levelDone(2) && backstage.s.level === 2 ? 'Pantallas 1 y 2 superadas' : `En curso · pantalla ${backstage.s.level}`
+  );
   const pixelStatus = $derived(
     !pixel.ready || !pixel.s.intro ? 'Nuevo' : pixel.s.end4 ? 'Juego completado' : pixel.s.end3 ? 'Mundos 1, 2 y 3 superados' : `En curso · mundo ${pixel.s.world}`
   );
@@ -124,6 +129,25 @@
           art, habla con sus habitantes, empuja, combina y descifra para encontrar la salida.
         </p>
         <p class="status">{pixelStatus} · Entrar →</p>
+      </div>
+    </a>
+
+    <a class="game bastidores" href="/entre-bastidores">
+      <div class="preview">
+        <div class="bios" aria-hidden="true">
+          <p>CARGANDO…</p>
+          <p class="bbar"><i></i></p>
+          <p class="pct">99 %</p>
+        </div>
+      </div>
+      <div class="info">
+        <p class="tag">Escape room 4 · Nuevo · Parte 2 de Fuera de Juego</p>
+        <h2>Entre Bastidores</h2>
+        <p>
+          Leo vuelve a caer en la consola, pero esta vez detrás del juego: pantallas de carga, menús
+          rotos, opciones y depuración. Seis pantallas que nadie debería ver por dentro.
+        </p>
+        <p class="status">{backstageStatus} · Entrar →</p>
       </div>
     </a>
   </div>
@@ -274,6 +298,38 @@
     color: #1d2b1a;
     animation: blink 1s steps(1) infinite;
   }
+  .bastidores .preview {
+    display: grid;
+    place-items: center;
+    background: #00002a;
+  }
+  .bios {
+    display: grid;
+    gap: 0.6rem;
+    width: 60%;
+    padding: 1rem;
+    border: 0.5rem solid #9a9a9a;
+    background: #0000aa;
+    color: #ffffff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(0.45rem, 1.1vw, 0.6rem);
+  }
+  .bbar {
+    height: 0.8rem;
+    border: 2px solid #ffffff;
+  }
+  .bbar i {
+    display: block;
+    width: 99%;
+    height: 100%;
+    background: #ffff55;
+  }
+  .pct {
+    justify-self: end;
+    color: #ffff55;
+    animation: blink 1s steps(1) infinite;
+  }
+  .bastidores h2,
   .pixel h2 {
     font-family: 'Press Start 2P', monospace;
     font-size: clamp(0.95rem, 2.2vw, 1.2rem);
