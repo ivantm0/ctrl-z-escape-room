@@ -38,7 +38,7 @@
       <p class="kicker">Sala {room.n} · cerrada</p>
       <h1>La puerta no cede.</h1>
       <p>Primero tendrás que escapar de la sala anterior.</p>
-      <a href="/">← Volver al vestíbulo</a>
+      <a href="/origen">← Volver al vestíbulo</a>
     </div>
   {:else if !Level}
     <Finale {room} />

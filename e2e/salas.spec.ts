@@ -24,7 +24,7 @@ const skipOffice = (page: Page) =>
 
 test.describe('vestíbulo', () => {
   test('muestra las 6 salas: la primera abierta y el resto cerradas', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/origen');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Escape');
     await expect(page.locator('.corridor li')).toHaveCount(6);
     await expect(page.getByRole('link', { name: /La Oficina/ })).toBeVisible();
@@ -39,7 +39,7 @@ test.describe('vestíbulo', () => {
 
   test('sin errores de accesibilidad', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/origen');
     const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
     expect(violations.map((v) => v.id)).toEqual([]);
   });
@@ -49,7 +49,7 @@ test('La Oficina se resuelve con la consola, el título y la selección', async 
   const logs: string[] = [];
   page.on('console', (msg) => logs.push(msg.text()));
 
-  await page.goto('/');
+  await page.goto('/origen');
   await page.getByRole('link', { name: /La Oficina/ }).click();
 
   // 1 · La contraseña está en la consola
@@ -96,7 +96,7 @@ test('el progreso se guarda al recargar', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'El post-it' })).toBeVisible();
   await page.reload();
   await expect(page.getByRole('heading', { name: 'El post-it' })).toBeVisible();
-  await page.goto('/');
+  await page.goto('/origen');
   await expect(page.getByRole('link', { name: /La Oficina/ })).toContainText('nivel 2/3');
 });
 

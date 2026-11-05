@@ -42,7 +42,7 @@
     {#if next?.ready}
       <a class="primary" href="/sala/{next.id}">Siguiente sala: {next.name} →</a>
     {/if}
-    <a href="/">Volver al vestíbulo</a>
+    <a href="/origen">Volver al vestíbulo</a>
     <button onclick={() => { game.reset(room.id); game.enter(room.id); }}>Repetir sala</button>
   </div>
 </section>

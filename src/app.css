@@ -89,6 +89,26 @@
   --font-ui: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
+.theme-pixel {
+  --bg: #10141a;
+  --fg: #c7d39c;
+  --accent: #9bbc0f;
+}
+
+.theme-faraon {
+  --bg: #1a1009;
+  --surface: #2a1b0f;
+  --fg: #f6e7c9;
+  --muted: #cdb58f;
+  --accent: #e9b54a;
+  --accent-ink: #1a1009;
+  --lapis: #3a63c4;
+  --line: rgb(233 181 74 / 0.3);
+  --font-display: 'Cinzel', Georgia, serif;
+  --font-ui: 'Spectral', Georgia, serif;
+  --font-glyph: 'Noto Sans Egyptian Hieroglyphs', sans-serif;
+}
+
 *,
 *::before,
 *::after {

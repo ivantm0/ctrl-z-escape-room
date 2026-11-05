@@ -1,101 +1,143 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { formatTime, game } from '$lib/game.svelte';
-  import { rooms, type Room } from '$lib/rooms';
+  import { game } from '$lib/game.svelte';
+  import { rooms } from '$lib/rooms';
+  import { faraon } from '$lib/faraon/state.svelte';
+  import { pixel } from '$lib/pixel/state.svelte';
+  import { MAPS } from '$lib/pixel/maps';
+
+  // Miniatura del pueblo del mundo 1: cada casilla, un píxel de su tono
+  const SHADE: Record<string, number> = { '#': 3, T: 2, H: 3, h: 1, d: 3, D: 3, W: 1, q: 1, f: 2, ',': 1, o: 2, K: 3, E: 3, c: 3, Q: 2, F: 1, N: 3, m: 3, '@': 3 };
+  const village = MAPS.pueblo.flatMap((row) => [...row].map((ch) => SHADE[ch] ?? 0));
   import DoorArt from '$lib/components/DoorArt.svelte';
 
   onMount(() => {
-    // La primera pista del juego ya está aquí, para quien curiosee
-    console.log(
-      '%c👀 ¿Curioseando la consola? Buena costumbre. Vuelve aquí a menudo.',
-      'font: 500 13px "IBM Plex Mono", monospace; color: #ffb347'
-    );
+    faraon.load();
+    pixel.load();
   });
+  const pixelStatus = $derived(
+    !pixel.ready || !pixel.s.intro ? 'Nuevo' : pixel.s.end4 ? 'Juego completado' : pixel.s.end3 ? 'Mundos 1, 2 y 3 superados' : `En curso · mundo ${pixel.s.world}`
+  );
 
-  const status = (room: Room) => {
-    if (!room.ready) return 'soon';
-    if (game.isDone(room.id)) return 'done';
-    if (room.requires && !game.isDone(room.requires)) return 'locked';
-    return game.get(room.id).start ? 'playing' : 'open';
+  const origenDone = $derived(rooms.filter((r) => game.isDone(r.id)).length);
+  const glows: Record<string, string> = {
+    oficina: '#39ff7a',
+    observatorio: '#e0b46a',
+    radio: '#ff6a3d',
+    laboratorio: '#3fe0b8',
+    archivo: '#d4a960',
+    maquina: '#ff2bd6',
   };
-
-  const doneCount = $derived(rooms.filter((r) => game.isDone(r.id)).length);
+  const faraonStatus = $derived(
+    !faraon.ready || !faraon.s.intro
+      ? 'Nuevo'
+      : faraon.chapterDone('huida')
+        ? 'Completado: has escapado con el mapa'
+        : faraon.chapterDone('tumba')
+          ? 'En curso · capítulo IV, la huida'
+        : faraon.chapterDone('piramide')
+          ? 'En curso · capítulo III, la tumba'
+        : faraon.chapterDone('mercado')
+          ? 'En curso · capítulo II, la pirámide'
+          : 'En curso · capítulo I, el mercado'
+  );
 </script>
 
 <svelte:head>
-  <title>Ctrl + Escape · Salas de escape en tu navegador</title>
+  <title>Ctrl + Escape · Escape rooms en tu navegador</title>
 </svelte:head>
 
 <main>
   <header>
-    <p class="kicker">Salas de escape en el navegador</p>
+    <p class="kicker">Escape rooms en el navegador</p>
     <h1>
       <span class="key">Ctrl</span><span class="plus">+</span><span class="key wide">Escape</span>
     </h1>
-    <p class="lead">
-      Aquí la pista nunca está en la pantalla. Está en la consola, en la pestaña, en el tamaño de tu
-      ventana o en el tema de tu sistema. Usa todo el navegador.
-    </p>
-    {#if game.ready}
-      <p class="progress">{doneCount} / {rooms.length} salas superadas</p>
-    {/if}
+    <p class="lead">Elige tu aventura.</p>
   </header>
 
-  <ol class="corridor">
-    {#each rooms as room, i}
-      {@const s = status(room)}
-      {@const progress = game.get(room.id)}
-      <li style="--i: {i}">
-        {#if s === 'open' || s === 'playing' || s === 'done'}
-          <a class="door {s} door-{room.id}" href="/sala/{room.id}">
-            {@render door(room, s, progress.end != null && progress.start != null ? formatTime(progress.end - progress.start) : '', progress.level)}
-          </a>
-        {:else}
-          <div class="door {s}" aria-disabled="true">
-            {@render door(room, s, '', 0)}
+  <div class="games">
+    <a class="game origen" href="/origen">
+      <div class="preview">
+        {#each rooms as room}
+          <span class="mini" style="--glow: {glows[room.id]}"><DoorArt id={room.id} /></span>
+        {/each}
+      </div>
+      <div class="info">
+        <p class="tag">Escape room 1</p>
+        <h2>Ctrl + Escape: El Origen</h2>
+        <p>
+          Seis salas donde la pista nunca está en la pantalla: consola, pestañas, tema del sistema,
+          portapapeles… Usa todo el navegador para escapar.
+        </p>
+        <p class="status">{game.ready ? `${origenDone} / ${rooms.length} salas superadas` : '6 salas'} · Entrar →</p>
+      </div>
+    </a>
+
+    <a class="game faraon" href="/faraon">
+      <div class="preview">
+        <svg viewBox="0 0 400 220" aria-hidden="true">
+          <defs>
+            <linearGradient id="home-sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#3b1d4a" /><stop offset="0.55" stop-color="#d9673a" /><stop offset="1" stop-color="#f4b860" />
+            </linearGradient>
+          </defs>
+          <rect width="400" height="220" fill="url(#home-sky)" />
+          <circle class="sun" cx="290" cy="150" r="34" fill="#ffd98a" />
+          <path d="M150 170 L235 75 L320 170Z" fill="#a8562b" />
+          <path d="M235 75 L320 170 H250Z" fill="#7c3a1d" />
+          <path d="M40 170 L95 112 L150 170Z" fill="#b8673a" />
+          <path d="M95 112 L150 170 H112Z" fill="#8a4626" />
+          <path d="M0 170 Q100 158 200 170 T400 166 V220 H0Z" fill="#e3a560" />
+          <path d="M0 192 Q120 180 240 194 T400 188 V220 H0Z" fill="#c98544" />
+          <g fill="#2a1408">
+            <path d="M350 170 v-40" stroke="#2a1408" stroke-width="4" />
+            <path d="M350 130 q-20 -6 -30 6 q16 -4 30 -6 q-8 -16 -26 -14 q18 2 26 14 q14 -16 32 -10 q-20 0 -32 10 q22 -2 30 12 q-14 -10 -30 -12z" />
+          </g>
+        </svg>
+      </div>
+      <div class="info">
+        <p class="tag">Escape room 2 · Nuevo</p>
+        <h2>El Mapa del Faraón</h2>
+        <p>
+          Tebas, 1250 a. C. Un mapa escondido en un sarcófago. Explora el mercado, la pirámide y la
+          tumba, resuelve sus acertijos y escapa antes de que se selle para siempre.
+        </p>
+        <p class="status">{faraonStatus} · Entrar →</p>
+      </div>
+    </a>
+
+    <a class="game pixel" href="/fuera-de-juego">
+      <div class="preview">
+        <div class="lcd" aria-hidden="true">
+          <div class="pgrid">
+            {#each village as c}<span class="c{c}"></span>{/each}
           </div>
-        {/if}
-      </li>
-    {/each}
-  </ol>
-
-  <footer>
-    <p>Ventana amplia y auriculares recomendados. Tu progreso se guarda en este navegador.</p>
-    {#if game.ready && Object.keys(game.rooms).length}
-      <button onclick={() => confirm('¿Borrar todo el progreso?') && game.reset()}>Reiniciar progreso</button>
-    {/if}
-  </footer>
+          <p class="press">PRESS START</p>
+        </div>
+      </div>
+      <div class="info">
+        <p class="tag">Escape room 3 · Nuevo</p>
+        <h2>Fuera de Juego</h2>
+        <p>
+          Leo enciende una consola antigua de madrugada y el juego se lo traga. Recorre mundos en pixel
+          art, habla con sus habitantes, empuja, combina y descifra para encontrar la salida.
+        </p>
+        <p class="status">{pixelStatus} · Entrar →</p>
+      </div>
+    </a>
+  </div>
 </main>
-
-{#snippet door(room: Room, s: string, time: string, level: number)}
-  <span class="n">{room.n}</span>
-  <span class="knob" aria-hidden="true"></span>
-  <span class="art-wrap"><DoorArt id={room.id} /></span>
-  <span class="body">
-    <span class="name">{room.name}</span>
-    <span class="tagline">{room.tagline}</span>
-    <span class="tags">{room.tags.join(' · ')}</span>
-  </span>
-  <span class="state">
-    {#if s === 'done'}✓ Superada · {time}
-    {:else if s === 'playing'}En curso · nivel {level + 1}/{room.levels.length}
-    {:else if s === 'open'}Entrar →
-    {:else if s === 'locked'}🔒 Supera la sala anterior
-    {:else}Próximamente{/if}
-  </span>
-  <span class="light" aria-hidden="true"></span>
-{/snippet}
 
 <style>
   main {
     max-width: 82rem;
     margin: 0 auto;
-    padding: clamp(3rem, 8vw, 6rem) clamp(1rem, 4vw, 2.5rem) 3rem;
+    padding: clamp(3rem, 8vw, 6rem) clamp(1rem, 4vw, 2.5rem) 4rem;
   }
   header {
     display: grid;
-    gap: 1.5rem;
-    max-width: 46rem;
+    gap: 1.4rem;
   }
   .kicker {
     font-size: 0.75rem;
@@ -113,189 +155,178 @@
     font-weight: 800;
     letter-spacing: -0.03em;
   }
-  /* Teclas de verdad: se hunden al pasar el ratón */
   .key {
     padding: 0.12em 0.4em 0.18em;
     border: 1px solid rgb(241 235 226 / 0.2);
     border-radius: 0.22em;
     background: linear-gradient(#1f1c19, #141210);
     box-shadow: 0 0.1em 0 #2c2722, 0 0.14em 0 #000, 0 0.4em 1em rgb(0 0 0 / 0.5);
-    transition: transform 0.12s, box-shadow 0.12s;
   }
   .key.wide {
     color: var(--accent);
-  }
-  .key:hover {
-    transform: translateY(0.08em);
-    box-shadow: 0 0.02em 0 #2c2722, 0 0.05em 0 #000;
   }
   .plus {
     color: var(--muted);
     font-weight: 500;
   }
   .lead {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
+    color: var(--muted);
+  }
+  .games {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+    gap: 1.5rem;
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+  }
+  .game {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 0.8rem;
+    background: var(--surface);
+    color: var(--fg);
+    text-decoration: none;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.4s, box-shadow 0.4s;
+  }
+  .game:hover,
+  .game:focus-visible {
+    transform: translateY(-6px);
+    border-color: var(--accent);
+    box-shadow: 0 30px 60px rgb(0 0 0 / 0.5);
+  }
+  .preview {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+  }
+  .origen .preview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+  }
+  .mini {
+    display: grid;
+    place-items: center;
+    padding: 0.8rem;
+    background: #110f0d;
+  }
+  .faraon .preview svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .faraon:hover .preview svg {
+    transform: scale(1.06);
+  }
+  .sun {
+    animation: sunset 8s ease-in-out infinite alternate;
+  }
+  .pixel .preview {
+    display: grid;
+    place-items: center;
+    background: #2a2f36;
+  }
+  .lcd {
+    position: relative;
+    width: 72%;
+    aspect-ratio: 160 / 144;
+    width: 52%;
+    border: 0.8rem solid #1a1d22;
+    background: #c7d39c;
+    overflow: hidden;
+    image-rendering: pixelated;
+  }
+  .pgrid {
+    display: grid;
+    grid-template-columns: repeat(20, 1fr);
+    grid-template-rows: repeat(18, 1fr);
+    width: 100%;
+    height: 100%;
+  }
+  .pgrid .c1 { background: #8fa36a; }
+  .pgrid .c2 { background: #4f6a3d; }
+  .pgrid .c3 { background: #1d2b1a; }
+  .leo {
+    position: absolute;
+    left: 45%;
+    top: 40%;
+    width: 10%;
+    aspect-ratio: 1;
+    background: #1d2b1a;
+    box-shadow: inset 0 0.35rem 0 #4f6a3d;
+    animation: hop 0.8s steps(2) infinite;
+  }
+  .press {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8%;
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(0.45rem, 1.2vw, 0.65rem);
+    text-align: center;
+    width: fit-content;
+    margin: 0 auto;
+    padding: 0.2rem 0.4rem;
+    background: #c7d39c;
+    color: #1d2b1a;
+    animation: blink 1s steps(1) infinite;
+  }
+  .pixel h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(0.95rem, 2.2vw, 1.2rem);
+    line-height: 1.5;
+  }
+  @keyframes hop {
+    50% { transform: translateY(-15%); }
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+  .info {
+    display: grid;
+    align-content: start;
+    gap: 0.8rem;
+    padding: 1.6rem;
+  }
+  .tag {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-weight: 500;
+  }
+  .faraon h2 {
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 700;
+  }
+  .info p:not(.tag) {
     line-height: 1.6;
     color: var(--muted);
   }
-  .progress {
-    font-size: 0.8rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .corridor {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
-    gap: 1.25rem;
-    margin: clamp(3rem, 7vw, 5rem) 0 0;
-    padding: 0;
-    list-style: none;
-  }
-  /* Todas las puertas de una fila con la misma altura */
-  li {
-    display: grid;
-    animation: rise 0.7s calc(var(--i) * 70ms) both cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .door {
-    position: relative;
-    display: grid;
-    grid-template-rows: auto 1fr auto auto;
-    gap: 1rem;
-    min-height: 26rem;
-    padding: 1.4rem 1.4rem 1.6rem;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    border-radius: 0.5rem 0.5rem 0 0;
-    background: linear-gradient(180deg, #1b1815, #110f0d);
-    color: var(--fg);
-    text-decoration: none;
-    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.35s;
-  }
-  /* Cada puerta deja ver la luz de su sala por debajo */
-  .door-oficina { --glow: #39ff7a; }
-  .door-observatorio { --glow: #e0b46a; }
-  .door-radio { --glow: #ff6a3d; }
-  .door-laboratorio { --glow: #3fe0b8; }
-  .door-archivo { --glow: #d4a960; }
-  .door-maquina { --glow: #ff2bd6; }
-  .light {
-    position: absolute;
-    inset: auto 0 0;
-    height: 45%;
-    background: radial-gradient(60% 100% at 50% 100%, color-mix(in srgb, var(--glow, var(--accent)) 35%, transparent), transparent);
-    opacity: 0.35;
-    transition: opacity 0.35s;
-    pointer-events: none;
-  }
-  a.door:hover,
-  a.door:focus-visible {
-    border-color: var(--glow, var(--accent));
-    transform: translateY(-6px);
-  }
-  a.door:hover .light,
-  a.door:focus-visible .light {
-    opacity: 1;
-  }
-  .art-wrap {
-    display: grid;
-    place-items: center;
-    height: 8.5rem;
-    padding: 0 1.2rem;
-    opacity: 0.85;
-    transition: opacity 0.35s, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  a.door:hover .art-wrap,
-  a.door:focus-visible .art-wrap {
-    opacity: 1;
-    transform: scale(1.06);
-  }
-  /* Salas cerradas: la ilustración se ve apagada, como tras un cristal */
-  .locked .art-wrap {
-    opacity: 0.25;
-    filter: grayscale(1) blur(1px);
-  }
-  .n {
-    font-family: var(--font-display);
-    font-size: 3.2rem;
-    font-weight: 800;
-    line-height: 1;
-    color: var(--glow, var(--muted));
-  }
-  .knob {
-    position: absolute;
-    top: 55%;
-    right: 1.1rem;
-    width: 0.7rem;
-    height: 0.7rem;
-    border-radius: 50%;
-    background: var(--glow, #4a443d);
-    box-shadow: 0 0 12px var(--glow, transparent);
-  }
-  .body {
-    display: grid;
-    align-content: end;
-    gap: 0.5rem;
-  }
-  .name {
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-    font-weight: 500;
-  }
-  .tagline {
-    font-size: 0.85rem;
-    line-height: 1.5;
-    color: var(--muted);
-  }
-  .tags {
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--glow, var(--muted));
-  }
-  .state {
-    position: relative;
-    z-index: 1;
-    padding-top: 1rem;
-    border-top: 1px solid var(--line);
+  .info .status {
+    margin-top: 0.4rem;
     font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+    color: var(--fg);
   }
-  .done .state {
-    color: var(--glow);
-  }
-  .soon,
-  .locked {
-    background: repeating-linear-gradient(135deg, #12100e 0 12px, #0f0d0c 12px 24px);
-  }
-  .soon .n,
-  .soon .name,
-  .soon .tagline,
-  .soon .tags {
-    opacity: 0.55;
-  }
-  footer {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: 3rem;
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-  footer button {
-    padding: 0;
-    border: 0;
-    background: none;
-    color: var(--muted);
-    text-decoration: underline;
-  }
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(30px); }
+  @keyframes sunset {
+    to {
+      transform: translateY(14px);
+    }
   }
   @media (prefers-reduced-motion: reduce) {
-    li { animation: none; }
-    .door { transition: none; }
+    .leo,
+    .press,
+    .sun {
+      animation: none;
+    }
   }
 </style>

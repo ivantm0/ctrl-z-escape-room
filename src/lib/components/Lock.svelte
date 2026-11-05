@@ -29,7 +29,10 @@
     } else {
       taunt = taunts[normalize(value)] ?? '';
       status = 'wrong';
-      setTimeout(() => (status = 'idle'), taunt ? 2500 : 650);
+      // Solo vuelve a reposo si nadie ha acertado mientras tanto
+      setTimeout(() => {
+        if (status === 'wrong') status = 'idle';
+      }, taunt ? 2500 : 650);
     }
   }
 </script>

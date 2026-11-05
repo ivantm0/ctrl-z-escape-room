@@ -22,7 +22,7 @@
 </script>
 
 <header class="hud">
-  <a class="back" href="/" aria-label="Volver al vestíbulo">←<span class="wide">&nbsp;Vestíbulo</span></a>
+  <a class="back" href="/origen" aria-label="Volver al vestíbulo">←<span class="wide">&nbsp;Vestíbulo</span></a>
   <div class="title">
     <span class="n">{room.n}</span>
     <span class="name">{room.name}</span>
