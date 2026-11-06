@@ -58,8 +58,8 @@ export const HINTS: Record<Step, [string, string, string]> = {
   ],
   login: [
     'Los comentarios del suelo (//) son notas del programador. Ponte encima y pulsa A.',
-    'La contraseña es el nombre del jugador 1. Escríbela pisando las teclas del suelo (A en cada una) y pisa OK (ENTER). La tecla < borra.',
-    'Escribe L, E y O, y pulsa A sobre OK.',
+    'Lee los tres comentarios. El de la línea 40 explica dónde está la contraseña: en la primera letra de cada comentario, ordenados por su número de línea. Se escribe pisando las teclas del suelo (A en cada una) y pulsando A sobre OK. La tecla < borra.',
+    'Las iniciales son B (línea 12: «Borrar…»), U (línea 27: «Una cosa más…») y G (línea 40: «Guardo…»). Escribe B, U y G, y pulsa A sobre OK.',
   ],
   llave: [
     'Con la sesión iniciada funcionan las plataformas de teletransporte: X−, X+, Y−, Y+ y GO.',
@@ -72,22 +72,22 @@ export const HINTS: Record<Step, [string, string, string]> = {
     'Desde el cofre: abajo, derecha, derecha y derecha otra vez para cruzar la puerta.',
   ],
   nombre: [
-    'Los créditos suben un renglón cada dos pasos. Solo se pisan letras: el hueco entre nombres es vacío. Entre tantos nombres hay uno que no debería estar ahí.',
+    'Los créditos suben un renglón cada dos pasos. Solo se pisan letras: el hueco entre nombres es vacío. Entre tantos nombres hay uno que no debería estar ahí, y parpadea en rojo.',
     'Baja deprisa para ganar margen: si te quedas en el renglón de arriba, el scroll te saca. Chocar con el borde cuenta como un paso. El nombre raro está hacia la mitad, pegado a la izquierda.',
     'Desde el principio (pulsa R): abajo ×2, izquierda ×2, abajo ×2, derecha, abajo ×4, derecha ×5, abajo ×2, izquierda ×6, abajo ×2, derecha, abajo ×2, izquierda, abajo ×3, derecha ×2, abajo, derecha ×2, abajo ×4, izquierda ×2, abajo ×5, izquierda ×2, abajo ×3, izquierda ×3, abajo ×5, derecha, abajo ×2, derecha ×2, abajo ×3, derecha ×6, abajo, derecha ×2, abajo ×2, izquierda ×2, abajo ×2, izquierda ×5, abajo ×2, izquierda, abajo ×2, izquierda ×3, abajo ×2, derecha ×8, abajo, derecha ×3, abajo ×2, izquierda, abajo ×3.',
   ],
   fin: [
     'Ya has encontrado tu nombre. Ahora llega hasta el final de los créditos.',
     'El último renglón dice «GRACIAS POR JUGAR». Pisarlo termina la pantalla.',
-    'Si los créditos ya han pasado de largo, rebobina con R y repite el recorrido completo (pasar otra vez por LEO no estorba). Desde el principio: abajo ×2, izquierda ×2, abajo ×2, derecha, abajo ×4, derecha ×5, abajo ×2, izquierda ×6, abajo ×2, derecha, abajo ×2, izquierda, abajo ×3, derecha ×2, abajo, derecha ×2, abajo ×4, izquierda ×2, abajo ×5, izquierda ×2, abajo ×3, izquierda ×3, abajo ×5, derecha, abajo ×2, derecha ×2, abajo ×3, derecha ×6, abajo, derecha ×2, abajo ×2, izquierda ×2, abajo ×2, izquierda ×5, abajo ×2, izquierda, abajo ×2, izquierda ×3, abajo ×2, derecha ×8, abajo, derecha ×3, abajo ×2, izquierda, abajo ×3.',
+    'Si los créditos ya han pasado de largo, rebobina con R y repite el recorrido completo (pasar otra vez por «TU» no estorba). Desde el principio: abajo ×2, izquierda ×2, abajo ×2, derecha, abajo ×4, derecha ×5, abajo ×2, izquierda ×6, abajo ×2, derecha, abajo ×2, izquierda, abajo ×3, derecha ×2, abajo, derecha ×2, abajo ×4, izquierda ×2, abajo ×5, izquierda ×2, abajo ×3, izquierda ×3, abajo ×5, derecha, abajo ×2, derecha ×2, abajo ×3, derecha ×6, abajo, derecha ×2, abajo ×2, izquierda ×2, abajo ×2, izquierda ×5, abajo ×2, izquierda, abajo ×2, izquierda ×3, abajo ×2, derecha ×8, abajo, derecha ×3, abajo ×2, izquierda, abajo ×3.',
   ],
   datos: [
     'La partida de la ranura 3 necesita tres datos: JUGADOR, MUNDO y HORA. Los bytes sueltos (?) dicen cuáles son; leerlos no gasta tiempo, pero caminar sí.',
     'JUGADOR es el nombre de los créditos, MUNDO es 6 − 2 y HORA es 3:08. La corrupción nace a la izquierda: empieza por ese lado. R reinicia.',
-    'Desde el principio (pulsa R): arriba ×3, izquierda ×5, arriba ×2, derecha, arriba ×4, izquierda, arriba, derecha ×3, abajo, derecha ×10, abajo ×6 e izquierda ×4. Ojo: pisar BIT después de LEO lo cambiaría.',
+    'Desde el principio (pulsa R): arriba ×3, izquierda ×5, arriba ×2, derecha, arriba ×4, izquierda, arriba, derecha ×3, abajo, derecha ×10, abajo ×6 e izquierda ×4. Ojo: pisar BIT después de TU lo cambiaría.',
   ],
   guardar: [
-    'Con los tres datos bien (LEO, 4 y 3:08), solo falta guardar.',
+    'Con los tres datos bien (TU, 4 y 3:08), solo falta guardar.',
     'Pisa la plataforma verde de GUARDAR antes de que llegue la corrupción. No pises otras opciones por el camino: cambiarían el dato.',
     'GUARDAR está a la derecha, en la misma fila que las horas.',
   ],

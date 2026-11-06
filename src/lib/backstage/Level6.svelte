@@ -80,7 +80,7 @@
     say(
       [
         'GUARDANDO… NO APAGUES LA CONSOLA.',
-        'JUGADOR: LEO · MUNDO: 4 · HORA: 3:08 … PARTIDA GUARDADA.',
+        'JUGADOR: TU · MUNDO: 4 · HORA: 3:08 … PARTIDA GUARDADA.',
         'La corrupción se detiene. Los colores se ordenan. Y la pantalla, por fin, se apaga.',
       ],
       () => backstage.complete('guardar')

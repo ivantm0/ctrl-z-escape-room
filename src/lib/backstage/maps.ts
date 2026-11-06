@@ -165,21 +165,22 @@ export const DEBUG: string[] = [
   '#..................#',
   '####################',
 ];
-export const PASSWORD = 'LEO';
+/** La contraseña: las iniciales de los tres comentarios, por orden de línea (12, 27, 40) */
+export const PASSWORD = 'BUG';
 /** El cofre de pruebas: x = 0x10, y = la mitad de x menos cinco */
 export const DEBUG_KEY: [number, number] = [16, 3];
 export const START4 = { x: 10, y: 16 };
 export const TP_START: [number, number] = [10, 10];
 export const COMMENTS: Record<string, string[]> = {
-  '5,6': ['// TODO: quitar el cofre de pruebas antes de publicar.', '// Lo dejé en x = 0x10.'],
-  '16,12': ['// La y del cofre: la mitad de x, menos cinco.', '// (No me juzguéis, era muy tarde.)'],
-  '3,15': ['// Contraseña de desarrollador = el nombre del jugador 1.', '// Así no se me olvida.'],
+  '5,6': ['LÍNEA 12 · // Borrar el cofre de pruebas antes de publicar.', '// Lo dejé en x = 0x10.'],
+  '16,12': ['LÍNEA 27 · // Una cosa más: la y del cofre es la mitad de x, menos cinco.', '// (No me juzguéis, era muy tarde.)'],
+  '3,15': ['LÍNEA 40 · // Guardo la contraseña donde nadie mira: en la primera letra de cada comentario,', '// leídos por orden de línea. Así no se me olvida.'],
 };
 
 // Pantalla 5 · Créditos
 //   Los créditos suben un renglón cada dos movimientos de Leo. Solo se pisan letras (o '_'):
 //   el espacio entre nombres es vacío. Si el scroll te saca por arriba o pisas un hueco, vuelven a empezar.
-//   Comprobado con búsqueda en anchura: 118 movimientos como mínimo, pasando por LEO (fila 33).
+//   Comprobado con búsqueda en anchura: 118 movimientos como mínimo, pasando por el nombre raro, «TU» (fila 33).
 export const CREDITS: string[] = [
   '   ______________   ',
   '   ___CREDITOS___   ',
@@ -206,7 +207,7 @@ export const CREDITS: string[] = [
   '    __NADIE___      ',
   '    __MARKETING___  ',
   '        TAMPOCO_    ',
-  '      GRAC    _TI__ ',
+  '      GRAC    LOS_B ',
   '     __DIRECCION___ ',
   '  __ANA_PIXEL__     ',
   '        ___GUION___ ',
@@ -214,7 +215,7 @@ export const CREDITS: string[] = [
   '     PRO       LUCI ',
   ' __ARTE__ SPRIT     ',
   '    MUSICA_         ',
-  '  LEO   CHIP_TUNE   ',
+  '  TU_   CHIP_TUNE   ',
   '   __SONIDO___      ',
   '   LA_RUEDE   PRU   ',
   '   EL_CURS   IDIOMA ',
@@ -228,7 +229,7 @@ export const CREDITS: string[] = [
   '   NADI        MARK ',
   '  ___TAMPOCO____    ',
   '  _GRACIAS_A__      ',
-  '     ______TI______ ',
+  '     ___LOS_BETA___ ',
   '  DIRECCI      ANA  ',
   '  _GUION_      MAR  ',
   '  PROGRA  LUCIA     ',
@@ -242,7 +243,8 @@ export const CREDITS: string[] = [
   '    ____FIN_____    ',
   '    GRACIAS_POR_    ',
 ];
-export const CREDITS_LEO = { row: 33, from: 2, to: 4 };
+/** El nombre que no debería estar en los créditos: «TU», el jugador (parpadea en rojo) */
+export const CREDITS_ODD = { row: 33, from: 2, to: 4 };
 export const START5 = { x: 9, y: 2 };
 /** Movimientos de Leo por cada renglón que suben los créditos */
 export const SCROLL_EVERY = 2;
@@ -251,7 +253,7 @@ export const creditsOffset = (turns: number) => Math.min(Math.floor(turns / SCRO
 
 // Pantalla 6 · Memoria de guardado (final)
 //   M monitor con la partida   ? byte suelto (pista)   S GUARDAR
-//   Plataformas de datos: a ANA  b LEO  c BIT · 1 2 3 4 (mundo) · d 3:07  e 3:08  f 3:09
+//   Plataformas de datos: a ANA  b TU  c BIT · 1 2 3 4 (mundo) · d 3:07  e 3:08  f 3:09
 //   La corrupción nace en CORRUPTION y avanza una casilla (distancia Manhattan) cada CORRUPT_EVERY pasos.
 //   Comprobado con búsqueda en anchura: 41 pasos como mínimo y solo 3 de margen
 //   (pisar otra opción del mismo dato la sustituye, así que hay que esquivar las equivocadas).
@@ -278,7 +280,7 @@ export const MEMORY: string[] = [
 export type FieldId = 'jugador' | 'mundo' | 'hora';
 export const PADS6: Record<string, { field: FieldId; value: string }> = {
   a: { field: 'jugador', value: 'ANA' },
-  b: { field: 'jugador', value: 'LEO' },
+  b: { field: 'jugador', value: 'TU' },
   c: { field: 'jugador', value: 'BIT' },
   '1': { field: 'mundo', value: '1' },
   '2': { field: 'mundo', value: '2' },
@@ -288,7 +290,7 @@ export const PADS6: Record<string, { field: FieldId; value: string }> = {
   e: { field: 'hora', value: '3:08' },
   f: { field: 'hora', value: '3:09' },
 };
-export const SAVE_GOAL: Record<FieldId, string> = { jugador: 'LEO', mundo: '4', hora: '3:08' };
+export const SAVE_GOAL: Record<FieldId, string> = { jugador: 'TU', mundo: '4', hora: '3:08' };
 export const START6 = { x: 10, y: 16 };
 export const CORRUPTION: [number, number] = [1, 11];
 export const CORRUPT_EVERY = 3;

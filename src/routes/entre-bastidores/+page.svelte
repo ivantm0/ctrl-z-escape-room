@@ -91,7 +91,7 @@
           <h2 id="end-title">¡PARTIDA GUARDADA!</h2>
           <p class="story">
             Leo abre los ojos. Es de día, la consola está apagada sobre la mesilla y, al encenderla, el menú
-            ya no tiene letras caídas: «CONTINUAR · RANURA 3 · LEO». Esta vez decide no pulsarlo. Por ahora.
+            ya no tiene letras caídas: «CONTINUAR · RANURA 3 · TU». Esta vez decide no pulsarlo. Por ahora.
           </p>
         {:else if level === 5}
           <h2 id="end-title">¡FIN… O NO!</h2>

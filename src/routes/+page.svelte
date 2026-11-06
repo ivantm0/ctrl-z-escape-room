@@ -178,6 +178,27 @@
         <ChainLock label="ACABA LA PARTE I: Fuera de Juego" reason="Termina Fuera de Juego (los 4 mundos) para desbloquearlo." />
       {/if}
     </svelte:element>
+
+    <a class="game oscuras" href="/a-oscuras">
+      <div class="preview">
+        <div class="dark" aria-hidden="true">
+          <span class="halo"></span>
+          <span class="ledge"></span>
+          <span class="ghost"></span>
+          <span class="hero"></span>
+          <span class="lamp"></span>
+        </div>
+      </div>
+      <div class="info">
+        <p class="tag">Escape room 5 · Nuevo · Prototipo</p>
+        <h2>A Oscuras</h2>
+        <p>
+          Un plataformas sin luz: solo ves lo que alumbras. Empuja cajas, pisa placas, esquiva pinchos y
+          usa el farol antes de que se apague para que aparezcan los caminos. Diez niveles.
+        </p>
+        <p class="status">Nuevo · Entrar →</p>
+      </div>
+    </a>
   </div>
 </main>
 
@@ -338,6 +359,68 @@
     background: #c7d39c;
     color: #1d2b1a;
     animation: blink 1s steps(1) infinite;
+  }
+  .oscuras .preview {
+    background: #07060b;
+  }
+  .dark {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(#07060b 70%, #1a1724 70%);
+  }
+  .dark span {
+    position: absolute;
+  }
+  .halo {
+    left: 34%;
+    top: 30%;
+    width: 36%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 214, 140, 0.35), rgba(255, 214, 140, 0.08) 55%, transparent 70%);
+    animation: flicker 3s ease-in-out infinite;
+  }
+  .ledge {
+    left: 0;
+    right: 0;
+    top: 70%;
+    height: 30%;
+    background: repeating-linear-gradient(90deg, #2d2840 0 8%, #352f48 8% 16%);
+  }
+  .ghost {
+    left: 58%;
+    top: 48%;
+    width: 20%;
+    height: 3%;
+    background: #6fd6e8;
+    box-shadow: 0 0 12px #6fd6e8;
+  }
+  .hero {
+    left: 47%;
+    top: 58%;
+    width: 4%;
+    height: 12%;
+    background: #e8e4f4;
+  }
+  .lamp {
+    left: 51.5%;
+    top: 61%;
+    width: 1.6%;
+    height: 5%;
+    background: #ffcf6b;
+    box-shadow: 0 0 10px #ffcf6b;
+  }
+  @keyframes flicker {
+    50% {
+      opacity: 0.8;
+      transform: scale(0.97);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .halo {
+      animation: none;
+    }
   }
   .bastidores .preview {
     display: grid;

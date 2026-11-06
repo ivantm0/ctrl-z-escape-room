@@ -90,7 +90,7 @@
       return say(
         logged
           ? ['> SESIÓN INICIADA COMO DESARROLLADOR.', '> Comandos disponibles: teletransporte (plataformas X−, X+, Y−, Y+ y GO).']
-          : ['> USUARIO: JUGADOR1', '> CONTRASEÑA: escríbela en el teclado del suelo (A sobre cada tecla) y pisa ENTER.']
+          : ['> USUARIO: JUGADOR1', '> CONTRASEÑA: escríbela en el teclado del suelo (A sobre cada tecla) y pulsa A sobre OK.', '> Recordatorio del programador: «la dejé en mis comentarios».']
       );
     if (ch === 'X') return say([hasKey ? 'La puerta está abierta.' : 'Puerta bloqueada. Requiere DEBUG_KEY.']);
   }

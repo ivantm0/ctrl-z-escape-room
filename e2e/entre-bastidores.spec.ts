@@ -215,10 +215,10 @@ test.describe('pantalla 4 · consola de depuración', () => {
     await onLevel4(page);
     await page.goto('/entre-bastidores');
     await play(page, 'LLLLLLL U A');
-    await expect(dialog(page)).toContainText('nombre del jugador 1');
-    await play(page, 'AA UU R A LL A RRRR A');
-    await expect(game(page)).toHaveAttribute('data-buffer', 'LEO');
-    await play(page, 'DD RRRRR A');
+    await expect(dialog(page)).toContainText('primera letra de cada comentario');
+    await play(page, 'AA UU RRRRR A RR A RR A');
+    await expect(game(page)).toHaveAttribute('data-buffer', 'BUG');
+    await play(page, 'DD L A');
     await expect(dialog(page)).toContainText('CONTRASEÑA CORRECTA');
     await play(page, 'AA UUUUU LLL U AAAAAA RR AAAAAAA');
     await expect(game(page)).toHaveAttribute('data-tp', '16,3');
@@ -254,12 +254,12 @@ test.describe('pantalla 5 · créditos', () => {
     await expect(game(page)).toHaveAttribute('data-turns', '0');
   });
 
-  test('bajar por los créditos, encontrar a LEO y llegar al final', async ({ page }) => {
+  test('bajar por los créditos, encontrar «TU» y llegar al final', async ({ page }) => {
     test.setTimeout(90_000);
     await onLevel5(page);
     await page.goto('/entre-bastidores');
     await play(page, 'DDLLDDRDDDDRRRRRDDLLLLLLDDRDDLDDDRRDRRDDDDLLDDDDDLLDDDLLLD');
-    await expect(dialog(page)).toContainText('«LEO»');
+    await expect(dialog(page)).toContainText('«TU»');
     await expect(game(page)).toHaveAttribute('data-found', 'si');
     await play(page, 'AA');
     await play(page, 'DDDDRDDRRDDDRRRRRRDRRDDLLDDLLLLLDDLDDLLLDDRRRRRRRRDRRRDDLDDD');
@@ -289,7 +289,7 @@ test.describe('pantalla 6 · memoria de guardado', () => {
       level: 6,
       ends: [null, 1, 2, 3, 4, Date.now() - 1000],
       done: [...DONE, 'datos'],
-      l6: { x: 10, y: 16, dir: 'up', turns: 0, sel: { jugador: 'LEO', mundo: '4', hora: '3:08' } },
+      l6: { x: 10, y: 16, dir: 'up', turns: 0, sel: { jugador: 'TU', mundo: '4', hora: '3:08' } },
     });
     await page.goto('/entre-bastidores');
     const hints = page.getByRole('complementary', { name: 'Pistas' });
@@ -312,11 +312,11 @@ test.describe('pantalla 6 · memoria de guardado', () => {
     await expect(game(page)).toHaveAttribute('data-turns', '0');
   });
 
-  test('LEO, mundo 4 y las 3:08: partida guardada y fin del juego', async ({ page }) => {
+  test('TU, mundo 4 y las 3:08: partida guardada y fin del juego', async ({ page }) => {
     await onLevel6(page);
     await page.goto('/entre-bastidores');
     await play(page, 'UUULLLLLUURUUUULURRRDRRRRRRRRRRDDDDDDLLLL');
-    await expect(game(page)).toHaveAttribute('data-sel', 'LEO|4|3:08');
+    await expect(game(page)).toHaveAttribute('data-sel', 'TU|4|3:08');
     await expect(dialog(page)).toContainText('NO APAGUES LA CONSOLA');
     await play(page, 'AAA');
     await expect(page.getByRole('heading', { name: '¡PARTIDA GUARDADA!' })).toBeVisible();

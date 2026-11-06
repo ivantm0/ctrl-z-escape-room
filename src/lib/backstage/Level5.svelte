@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { CREDITS, CREDITS_LEO, CREDITS_VIEW, START5, creditsOffset } from './maps';
+  import { CREDITS, CREDITS_ODD, CREDITS_VIEW, START5, creditsOffset } from './maps';
   import { drawText, spriteS } from './art';
   import { backstage } from './state.svelte';
   import { TILE } from '$lib/pixel/art';
@@ -20,7 +20,7 @@
   onMount(() => (calm = matchMedia('(prefers-reduced-motion: reduce)').matches));
 
   const cell = (x: number, y: number) => CREDITS[y]?.[x] ?? ' ';
-  const isLeo = (x: number, y: number) => y === CREDITS_LEO.row && x >= CREDITS_LEO.from && x <= CREDITS_LEO.to;
+  const isOdd = (x: number, y: number) => y === CREDITS_ODD.row && x >= CREDITS_ODD.from && x <= CREDITS_ODD.to;
 
   function restart(lines: string[]) {
     Object.assign(backstage.s.l5, { ...START5, dir: 'down', turns: 0 });
@@ -52,10 +52,10 @@
     if (ny < creditsOffset(turns)) return restart(['Los créditos siguen subiendo y te sacan por arriba de la pantalla.']);
     Object.assign(backstage.s.l5, { x: nx, y: ny, turns });
 
-    if (isLeo(nx, ny) && !found) {
+    if (isOdd(nx, ny) && !found) {
       backstage.complete('nombre');
       sfx('item');
-      say(['Un momento… «LEO». Tu nombre está en los créditos, entre los de verdad.', 'Nadie te ha contratado. Alguien lo ha escrito ahí… como una contraseña para la memoria de guardado.']);
+      say(['Un momento… «TU». Los créditos te nombran a ti, el jugador, entre los que hicieron el juego.', 'Tú no has programado nada. Alguien lo ha escrito ahí a propósito… y parpadea como un dato a medio guardar.']);
     }
     if (ny === LAST) {
       if (found) {
@@ -81,7 +81,7 @@
     const [dx, dy] = DELTA[l.dir];
     const tx = l.x + dx;
     const ty = l.y + dy;
-    if (isLeo(tx, ty) || isLeo(l.x, l.y)) return say(['LEO. ¿Qué hace tu nombre aquí?']);
+    if (isOdd(tx, ty) || isOdd(l.x, l.y)) return say(['«TU». ¿Qué haces tú en los créditos?']);
     say([
       'Los créditos suben un renglón cada dos pasos. Solo puedes pisar letras: entre nombre y nombre no hay suelo.',
       'Si te quedas arriba del todo, te sacan de la pantalla. Chocar con el borde también cuenta como un paso.',
@@ -112,8 +112,8 @@
         g.fillStyle = '#e8d5b0';
         g.fillRect(px, py, TILE, TILE - 1);
         if (ch === '_') continue;
-        // LEO no debería estar ahí: parpadea de vez en cuando
-        const odd = isLeo(x, y) && !calm && Math.floor(t / 180) % 7 === 0;
+        // «TU» no debería estar ahí: parpadea de vez en cuando
+        const odd = isOdd(x, y) && !calm && Math.floor(t / 180) % 7 === 0;
         drawText(g, ch, px + 2, py + 1, odd ? '#9c4a2a' : '#3d2a1a');
       }
     }
