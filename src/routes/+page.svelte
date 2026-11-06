@@ -175,7 +175,7 @@
         {/if}
       </div>
       {#if bastidoresLocked}
-        <ChainLock label="ACABA LA PARTE: Fuera de Juego" reason="Termina Fuera de Juego (los 4 mundos) para desbloquearlo." />
+        <ChainLock label="ACABA LA PARTE I: Fuera de Juego" reason="Termina Fuera de Juego (los 4 mundos) para desbloquearlo." />
       {/if}
     </svelte:element>
   </div>
