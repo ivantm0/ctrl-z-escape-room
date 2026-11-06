@@ -1,5 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
+// El Origen solo se juega en ordenador: en móvil aparece bloqueado (lo prueba bloqueos.spec.ts)
+test.skip(({ isMobile }) => isMobile, 'El Origen solo está disponible en ordenador');
+
 const ORDER = ['oficina', 'observatorio', 'radio', 'laboratorio', 'archivo', 'maquina'];
 
 const unlock = async (page: Page, answer: string) => {

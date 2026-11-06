@@ -17,7 +17,8 @@ const open = async (page: Page, name: string) => {
 };
 
 test.describe('portada', () => {
-  test('ofrece los dos escape rooms', async ({ page }) => {
+  test('ofrece los dos escape rooms', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'En móvil El Origen sale bloqueado (bloqueos.spec.ts)');
     await page.goto('/');
     await expect(page.getByRole('link', { name: /Ctrl \+ Escape: El Origen/ })).toHaveAttribute('href', '/origen');
     await expect(page.getByRole('link', { name: /El Mapa del Faraón/ })).toHaveAttribute('href', '/faraon');

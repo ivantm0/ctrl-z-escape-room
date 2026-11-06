@@ -6,17 +6,23 @@
   import { pixel } from '$lib/pixel/state.svelte';
   import { MAPS } from '$lib/pixel/maps';
   import { backstage } from '$lib/backstage/state.svelte';
+  import { device } from '$lib/device.svelte';
 
   // Miniatura del pueblo del mundo 1: cada casilla, un píxel de su tono
   const SHADE: Record<string, number> = { '#': 3, T: 2, H: 3, h: 1, d: 3, D: 3, W: 1, q: 1, f: 2, ',': 1, o: 2, K: 3, E: 3, c: 3, Q: 2, F: 1, N: 3, m: 3, '@': 3 };
   const village = MAPS.pueblo.flatMap((row) => [...row].map((ch) => SHADE[ch] ?? 0));
   import DoorArt from '$lib/components/DoorArt.svelte';
+  import ChainLock from '$lib/components/ChainLock.svelte';
 
   onMount(() => {
     faraon.load();
     pixel.load();
     backstage.load();
+    device.load();
   });
+  // El Origen necesita ordenador; la parte 2 de Fuera de Juego, haber terminado la parte 1
+  const origenLocked = $derived(device.touch);
+  const bastidoresLocked = $derived(!pixel.ready || !pixel.s.end4);
   const backstageStatus = $derived(
     !backstage.ready || !backstage.s.intro ? 'Nuevo' : backstage.levelDone(6) ? 'Completado: partida guardada' : backstage.levelDone(5) && backstage.s.level === 5 ? 'Pantallas 1 a 5 superadas' : backstage.levelDone(4) && backstage.s.level === 4 ? 'Pantallas 1 a 4 superadas' : backstage.levelDone(3) && backstage.s.level === 3 ? 'Pantallas 1, 2 y 3 superadas' : backstage.levelDone(2) && backstage.s.level === 2 ? 'Pantallas 1 y 2 superadas' : `En curso · pantalla ${backstage.s.level}`
   );
@@ -62,7 +68,13 @@
   </header>
 
   <div class="games">
-    <a class="game origen" href="/origen">
+    <svelte:element
+      this={origenLocked ? 'div' : 'a'}
+      class="game origen"
+      class:locked={origenLocked}
+      href={origenLocked ? undefined : '/origen'}
+      aria-disabled={origenLocked || undefined}
+    >
       <div class="preview">
         {#each rooms as room}
           <span class="mini" style="--glow: {glows[room.id]}"><DoorArt id={room.id} /></span>
@@ -75,9 +87,14 @@
           Seis salas donde la pista nunca está en la pantalla: consola, pestañas, tema del sistema,
           portapapeles… Usa todo el navegador para escapar.
         </p>
-        <p class="status">{game.ready ? `${origenDone} / ${rooms.length} salas superadas` : '6 salas'} · Entrar →</p>
+        {#if !origenLocked}
+          <p class="status">{game.ready ? `${origenDone} / ${rooms.length} salas superadas` : '6 salas'} · Entrar →</p>
+        {/if}
       </div>
-    </a>
+      {#if origenLocked}
+        <ChainLock label="SOLO EN ORDENADOR" reason="Solo en ordenador: sus pistas están en la consola, las pestañas y la ventana." />
+      {/if}
+    </svelte:element>
 
     <a class="game faraon" href="/faraon">
       <div class="preview">
@@ -132,7 +149,13 @@
       </div>
     </a>
 
-    <a class="game bastidores" href="/entre-bastidores">
+    <svelte:element
+      this={bastidoresLocked ? 'div' : 'a'}
+      class="game bastidores"
+      class:locked={bastidoresLocked}
+      href={bastidoresLocked ? undefined : '/entre-bastidores'}
+      aria-disabled={bastidoresLocked || undefined}
+    >
       <div class="preview">
         <div class="bios" aria-hidden="true">
           <p>CARGANDO…</p>
@@ -147,9 +170,14 @@
           Leo vuelve a caer en la consola, pero esta vez detrás del juego: pantallas de carga, menús
           rotos, opciones y depuración. Seis pantallas que nadie debería ver por dentro.
         </p>
-        <p class="status">{backstageStatus} · Entrar →</p>
+        {#if !bastidoresLocked}
+          <p class="status">{backstageStatus} · Entrar →</p>
+        {/if}
       </div>
-    </a>
+      {#if bastidoresLocked}
+        <ChainLock label="ACABA LA PARTE: Fuera de Juego" reason="Termina Fuera de Juego (los 4 mundos) para desbloquearlo." />
+      {/if}
+    </svelte:element>
   </div>
 </main>
 
@@ -219,6 +247,19 @@
     transform: translateY(-6px);
     border-color: var(--accent);
     box-shadow: 0 30px 60px rgb(0 0 0 / 0.5);
+  }
+  /* Tarjetas bloqueadas: apagadas y sin efecto al pasar por encima */
+  .game.locked {
+    position: relative;
+    cursor: not-allowed;
+  }
+  .game.locked:hover {
+    transform: none;
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  .game.locked .preview {
+    filter: grayscale(1) brightness(0.55);
   }
   .preview {
     aspect-ratio: 16 / 9;

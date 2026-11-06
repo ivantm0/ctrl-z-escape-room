@@ -8,6 +8,8 @@ const started = (page: Page, extra: Record<string, unknown> = {}) =>
     ([key, extra]) => {
       if (sessionStorage.getItem('seeded')) return;
       sessionStorage.setItem('seeded', '1');
+      // La parte 2 solo se abre con la parte 1 terminada
+      localStorage.setItem('ctrl-escape:pixel:v1', JSON.stringify({ intro: true, world: 4, start: 1, end: 2, end2: 3, end3: 4, end4: 5, muted: true }));
       localStorage.setItem(key, JSON.stringify({ intro: true, level: 1, start: Date.now() - 60_000, muted: true, ...extra }));
     },
     [KEY, extra] as const
@@ -26,6 +28,9 @@ const game = (page: Page) => page.locator('canvas[data-screen]');
 const dialog = (page: Page) => page.getByRole('dialog', { name: 'Diálogo' });
 
 test('la portada enlaza la parte 2 y la intro lleva a la pantalla de carga', async ({ page }) => {
+  await page.addInitScript(() =>
+    localStorage.setItem('ctrl-escape:pixel:v1', JSON.stringify({ intro: true, world: 4, start: 1, end: 2, end2: 3, end3: 4, end4: 5, muted: true }))
+  );
   await page.goto('/');
   await page.getByRole('link', { name: /Entre Bastidores/ }).click();
   await expect(page.getByText(/Leo ha vuelto a casa/)).toBeVisible();

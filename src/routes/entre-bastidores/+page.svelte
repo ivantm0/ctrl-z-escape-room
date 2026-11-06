@@ -3,6 +3,7 @@
   import { formatTime } from '$lib/game.svelte';
   import { setSound } from '$lib/pixel/audio';
   import Intro from '$lib/pixel/Intro.svelte';
+  import { pixel } from '$lib/pixel/state.svelte';
   import BHud from '$lib/backstage/BHud.svelte';
   import Level1 from '$lib/backstage/Level1.svelte';
   import Level2 from '$lib/backstage/Level2.svelte';
@@ -16,6 +17,7 @@
 
   onMount(() => {
     backstage.load();
+    pixel.load();
     document.documentElement.classList.add('theme-pixel');
     return () => {
       document.documentElement.classList.remove('theme-pixel');
@@ -40,8 +42,19 @@
 </svelte:head>
 
 <div class="page">
-  {#if !backstage.ready}
+  {#if !backstage.ready || !pixel.ready}
     <p class="loading">CARGANDO…</p>
+  {:else if !pixel.s.end4}
+    <main class="locked">
+      <p class="lock" aria-hidden="true">🔒</p>
+      <h1>PARTE 2 BLOQUEADA</h1>
+      <p>
+        Entre Bastidores continúa la historia de Leo justo donde acaba Fuera de Juego. Termina antes los
+        cuatro mundos de la parte 1 para desbloquearla.
+      </p>
+      <a class="primary" href="/fuera-de-juego">JUGAR A FUERA DE JUEGO ▶</a>
+      <a href="/">← VOLVER A LOS ESCAPE ROOMS</a>
+    </main>
   {:else if !backstage.s.intro || replay}
     <Intro world="bastidores" onfinish={() => { backstage.begin(); replay = false; }} />
   {:else}
@@ -133,6 +146,38 @@
     min-height: 100dvh;
     background: #00002a;
     color: #ffffff;
+  }
+  .locked {
+    display: grid;
+    min-height: 100dvh;
+    place-content: center;
+    justify-items: center;
+    gap: 1.2rem;
+    padding: 2rem 1.25rem;
+    font-family: 'Press Start 2P', monospace;
+    text-align: center;
+  }
+  .locked .lock {
+    font-size: 2.4rem;
+  }
+  .locked h1 {
+    font-size: clamp(1rem, 4vw, 1.6rem);
+    color: #ffff55;
+  }
+  .locked p {
+    max-width: 34rem;
+    font-size: 0.65rem;
+    line-height: 2;
+  }
+  .locked a {
+    color: #55ffff;
+    font-size: 0.6rem;
+  }
+  .locked .primary {
+    padding: 0.8rem 1rem;
+    background: #ffff55;
+    color: #00006a;
+    text-decoration: none;
   }
   .loading {
     display: grid;
