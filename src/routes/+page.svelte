@@ -191,10 +191,10 @@
       </div>
       <div class="info">
         <p class="tag">Escape room 5 · Nuevo · Prototipo</p>
-        <h2>A Oscuras</h2>
+        <h2>A Oscuras: la mina</h2>
         <p>
-          Un plataformas sin luz: solo ves lo que alumbras. Empuja cajas, pisa placas, esquiva pinchos y
-          usa el farol antes de que se apague para que aparezcan los caminos. Diez niveles.
+          1923. Una explosión de grisú sepulta la mina y tú, el aprendiz, despiertas a oscuras. Sube diez
+          galerías con una lámpara que se apaga, un pico, vagonetas y montacargas, entre los que no lo lograron.
         </p>
         <p class="status">Nuevo · Entrar →</p>
       </div>
