@@ -83,14 +83,14 @@ export const HINTS: Record<Step, [string, string, string]> = {
     'Con el rey despierto se abre un portal a la derecha del trono: entra en él.',
   ],
   espejos: [
-    'En el laboratorio del oeste, un rayo rebota en los espejos. Tiene que llegar al receptor dorado.',
-    'Ponte delante de un espejo y pulsa A para girarlo. Las columnas bloquean el rayo. R devuelve los espejos a como estaban.',
-    'Gira el espejo de la derecha del todo (a la altura del emisor), el de la esquina de arriba a la derecha, el de arriba en el centro y el de abajo en el centro.',
+    'En el laboratorio del oeste, un rayo rebota en los espejos. Tiene que llegar al receptor dorado, abajo a la derecha.',
+    'Ponte delante de un espejo y pulsa A para girarlo. Las columnas bloquean el rayo y no todos los espejos sirven: tres son señuelos. Piensa el camino al revés, desde el receptor. R devuelve los espejos a como estaban.',
+    'Desde el inicio (pulsa R), gira seis: el de la izquierda de los dos que hay a la altura del emisor, los dos de abajo a la izquierda de la entrada, el que está justo encima del de más a la izquierda, y los dos que hay juntos al lado del receptor.',
   ],
   almacen: [
-    'En el almacén del este hay tres cajas y tres marcas en el suelo.',
-    'Una caja contra una pared ya no se puede separar de ella. Piensa antes de empujar; R lo recoloca todo.',
-    'Empieza llevando la caja de la derecha hacia la marca de arriba y deja para el final la de la esquina de abajo a la izquierda.',
+    'En el almacén del este hay cinco cajas y cinco marcas, todas en la parte derecha. Da igual qué caja acabe en qué marca.',
+    'Una caja contra una pared ya no se separa de ella, y dos cajas juntas contra una pared tampoco se mueven. Rellena primero las marcas más metidas (el hueco de abajo y la esquina de arriba) y deja libre el pasillo central. R lo recoloca todo.',
+    'Desde la entrada (pulsa R): arriba ×2, derecha, arriba ×2, izquierda ×2, derecha ×2, abajo ×2, izquierda ×2, arriba, derecha ×3, arriba ×3, izquierda ×2, abajo ×2, derecha, abajo ×2, izquierda ×2, arriba, derecha ×2, izquierda ×3, arriba, derecha, izquierda ×2, arriba ×2, derecha, abajo, derecha, abajo, derecha ×3, arriba ×2, izquierda ×2, abajo, izquierda, abajo, derecha, arriba ×2, derecha ×2, abajo ×2, derecha, arriba ×2, izquierda ×3, abajo ×2, derecha, izquierda, arriba, izquierda ×3, abajo, derecha ×2, arriba, derecha, arriba, derecha ×2, abajo, derecha, abajo ×2, derecha, arriba ×2, izquierda, arriba, izquierda ×3, abajo, izquierda, abajo ×2, derecha ×2, arriba, derecha, izquierda, abajo, izquierda ×2, arriba, derecha ×2, izquierda, arriba ×2, derecha ×2, abajo, derecha ×2, abajo ×2, izquierda, arriba ×2, izquierda, arriba, izquierda ×2, abajo ×2, derecha ×2, arriba, derecha ×2, abajo ×2, izquierda, arriba, izquierda ×2, abajo, derecha.',
   ],
   estatuas: [
     'Las cuatro estatuas de la plaza guardan un secreto… que solo enseñan de noche.',
@@ -143,6 +143,29 @@ type World4 = {
   bits: boolean[];
   debug: boolean;
   fixed: boolean;
+};
+
+/** Pasos que se resuelven en cada sala (las salas de paso, como el patio, no tienen) */
+const ROOM_STEPS: Record<string, readonly Step[]> = {
+  // Mundo 1
+  pueblo: ['cajas', 'puerta'],
+  casa: ['cofre'],
+  cueva: ['rocas', 'runas'],
+  // Mundo 2
+  hielo: ['hielo'],
+  cristal: ['cristal'],
+  campanas: ['campanas'],
+  trono: ['corona', 'portal'],
+  // Mundo 3
+  plaza: ['estatuas'],
+  espejos: ['espejos'],
+  almacen: ['almacen'],
+  reloj: ['reloj', 'tiempo'],
+  // Mundo 4
+  gemelo: ['gemelo'],
+  noclip: ['noclip'],
+  memoria: ['memoria'],
+  vestibulo: ['nucleo', 'salida'],
 };
 
 type World3 = {
@@ -251,6 +274,8 @@ class Pixel {
     try {
       const saved = JSON.parse(localStorage.getItem(KEY) ?? '{}');
       this.s = { ...blank(), ...saved, w: { ...blankWorld(), ...(saved.w ?? {}) }, w2: { ...blankWorld2(), ...(saved.w2 ?? {}) }, w3: { ...blankWorld3(), ...(saved.w3 ?? {}) }, w4: { ...blankWorld4(), ...(saved.w4 ?? {}) } };
+      // Partidas guardadas con la sala de espejos antigua (6 espejos): se recolocan
+      if (this.s.w3.mirrors.length !== MIRRORS.initial.length) this.s.w3.mirrors = [...MIRRORS.initial];
     } catch {
       this.s = blank();
     }
@@ -293,8 +318,15 @@ class Pixel {
     if (step === 'salida') this.s.end4 ??= Date.now();
     this.save();
   }
+  /** Sala en la que está Leo dentro del mundo actual */
+  get room(): string {
+    const w = this.s.world;
+    return (w === 1 ? this.s.w : w === 2 ? this.s.w2 : w === 3 ? this.s.w3 : this.s.w4).screen;
+  }
+  /** Paso para el que se piden pistas: el pendiente de la sala donde está Leo; si allí no queda nada, el siguiente del mundo */
   get current(): Step | null {
-    return stepsOf(this.s.world).find((s) => !this.s.done.includes(s)) ?? null;
+    const pending = (list: readonly Step[]) => list.find((s) => !this.s.done.includes(s)) ?? null;
+    return pending(ROOM_STEPS[this.room] ?? []) ?? pending(stepsOf(this.s.world));
   }
 
   /** Inicio y fin del mundo actual (el 2 empieza cuando acaba el 1) */

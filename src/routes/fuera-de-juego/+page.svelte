@@ -52,7 +52,7 @@
     <PHud />
     <main>
       <h1 class="sr-only">Fuera de Juego, mundo {world}: {['Monocromo', '8 bits', '16 bits', 'Glitch'][world - 1]}</h1>
-      <p class="tip keys">Muévete con las flechas o WASD · A / Espacio para interactuar · R para reiniciar {world === 1 ? 'cajas o runas' : world === 2 || world === 4 ? 'la sala' : 'espejos o cajas'}</p>
+      <p class="tip keys">Muévete con las flechas o WASD · Espacio para interactuar · R para reiniciar {world === 1 ? 'cajas o runas' : world === 2 || world === 4 ? 'la sala' : 'espejos o cajas'}</p>
       <p class="tip touch">Cruceta para moverte · A para interactuar · ↺ reinicia {world === 1 ? 'cajas o runas' : world === 2 || world === 4 ? 'la sala' : 'espejos o cajas'}</p>
       {#if world === 1}
         {#key pixel.s.start}

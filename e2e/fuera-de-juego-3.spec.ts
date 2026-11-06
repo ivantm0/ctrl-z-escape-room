@@ -82,27 +82,38 @@ test.describe('mundo 3', () => {
     await expect(dialog(page)).toContainText('ENGRANAJE DE PLATA');
   });
 
-  test('laboratorio: girar cuatro espejos hasta que el rayo llegue al receptor', async ({ page }) => {
+  test('laboratorio: girar seis de los nueve espejos hasta que el rayo llegue al receptor', async ({ page }) => {
     await inWorld3(page, { screen: 'espejos', x: 10, y: 14, dir: 'up' });
     await page.goto('/fuera-de-juego');
     await expect(game(page)).toHaveAttribute('data-beam', 'no');
     // Girar uno y reiniciar con R
-    await play(page, 'R UA');
+    const initial = (await game(page).getAttribute('data-mirrors'))!;
+    await play(page, 'L LA');
+    await expect(game(page)).not.toHaveAttribute('data-mirrors', initial);
     await page.keyboard.press('r');
     await expect(dialog(page)).toContainText('vuelven a como estaban');
+    await expect(game(page)).toHaveAttribute('data-mirrors', initial);
     await play(page, 'A');
-    await play(page, 'UA RUUURUUURRR RA UUUUU RA DLLLLL UA');
+    // Seis espejos; los otros tres son señuelos
+    await play(page, 'L LA ULLD LA UL UA RUUUUR UA DDRRRRRRRRRD LA D LA');
     await expect(game(page)).toHaveAttribute('data-beam', 'receptor');
     await expect(dialog(page)).toContainText('El rayo llega al receptor');
     await play(page, 'AA');
     await expect(dialog(page)).toContainText('ENGRANAJE DE CRISTAL');
   });
 
-  test('almacén: tres cajas sobre tres marcas', async ({ page }) => {
+  test('almacén: cinco cajas sobre cinco marcas', async ({ page }) => {
+    test.setTimeout(90_000);
     await inWorld3(page, { screen: 'almacen', x: 9, y: 12, dir: 'up' });
     await page.goto('/fuera-de-juego');
-    await play(page, 'URRULLLRRUUUUDRRRULLLRULL');
-    await expect(dialog(page)).toContainText('Las tres marcas se iluminan');
+    // Un empuje y R lo recoloca todo
+    await play(page, 'U');
+    await expect(game(page)).toHaveAttribute('data-boxes', '8,7 8,9 9,7 9,8 9,10');
+    await page.keyboard.press('r');
+    await expect(dialog(page)).toContainText('vuelven a su sitio');
+    await play(page, 'A');
+    await play(page, 'UURUULLRRDDLLURRRUUULLDDRDDLLURRLLLURLLUURDRDRRRUULLDLDRUURRDDRUULLLDDRLULLLDRRURURRDRDDRUULULLLDLDDRRURLDLLURRLUURRDRRDDLUULULLDDRRURRDDLULLDR');
+    await expect(dialog(page)).toContainText('Las cinco marcas se iluminan');
     await play(page, 'AA');
     await expect(dialog(page)).toContainText('ENGRANAJE DE BRONCE');
   });
@@ -119,6 +130,15 @@ test.describe('mundo 3', () => {
     await play(page, 'AAA DDDD');
     await expect(page.getByRole('heading', { name: '¡EL TIEMPO VUELVE A CORRER!' })).toBeVisible();
     await expect(page.getByRole('button', { name: /CONTINUAR: MUNDO 4/ })).toBeVisible();
+  });
+
+  test('las pistas son las de la sala en la que está Leo', async ({ page }) => {
+    await inWorld3(page, { screen: 'almacen', x: 9, y: 12, dir: 'up' });
+    await page.goto('/fuera-de-juego');
+    await expect(game(page)).toHaveAttribute('data-screen', 'almacen');
+    await page.getByRole('button', { name: 'Pistas' }).click();
+    await page.getByRole('button', { name: 'VER PISTA' }).click();
+    await expect(page.getByRole('complementary', { name: 'Pistas' })).toContainText('cinco cajas');
   });
 
   test('la máquina avisa si faltan engranajes', async ({ page }) => {

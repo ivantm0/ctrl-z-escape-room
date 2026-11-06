@@ -54,7 +54,7 @@ export const HINTS: Record<Step, [string, string, string]> = {
   consola: [
     'Los ajustes están guardados: se ha abierto una puerta.',
     'La puerta está en la pared de la derecha, junto al cartel.',
-    'Camina hacia la derecha por la fila que hay justo debajo del cartel hasta cruzar la puerta.',
+    'La puerta está dos filas por debajo del cartel: camina por esa fila hacia la derecha hasta cruzarla.',
   ],
   login: [
     'Los comentarios del suelo (//) son notas del programador. Ponte encima y pulsa A.',
@@ -79,7 +79,7 @@ export const HINTS: Record<Step, [string, string, string]> = {
   fin: [
     'Ya has encontrado tu nombre. Ahora llega hasta el final de los créditos.',
     'El último renglón dice «GRACIAS POR JUGAR». Pisarlo termina la pantalla.',
-    'Si los créditos ya han pasado el nombre, rebobina con R y sigue la solución de la pista anterior.',
+    'Si los créditos ya han pasado de largo, rebobina con R y repite el recorrido completo (pasar otra vez por LEO no estorba). Desde el principio: abajo ×2, izquierda ×2, abajo ×2, derecha, abajo ×4, derecha ×5, abajo ×2, izquierda ×6, abajo ×2, derecha, abajo ×2, izquierda, abajo ×3, derecha ×2, abajo, derecha ×2, abajo ×4, izquierda ×2, abajo ×5, izquierda ×2, abajo ×3, izquierda ×3, abajo ×5, derecha, abajo ×2, derecha ×2, abajo ×3, derecha ×6, abajo, derecha ×2, abajo ×2, izquierda ×2, abajo ×2, izquierda ×5, abajo ×2, izquierda, abajo ×2, izquierda ×3, abajo ×2, derecha ×8, abajo, derecha ×3, abajo ×2, izquierda, abajo ×3.',
   ],
   datos: [
     'La partida de la ranura 3 necesita tres datos: JUGADOR, MUNDO y HORA. Los bytes sueltos (?) dicen cuáles son; leerlos no gasta tiempo, pero caminar sí.',
@@ -87,8 +87,8 @@ export const HINTS: Record<Step, [string, string, string]> = {
     'Desde el principio (pulsa R): arriba ×3, izquierda ×5, arriba ×2, derecha, arriba ×4, izquierda, arriba, derecha ×3, abajo, derecha ×10, abajo ×6 e izquierda ×4. Ojo: pisar BIT después de LEO lo cambiaría.',
   ],
   guardar: [
-    'Con los tres datos bien, solo falta guardar.',
-    'Pisa la plataforma verde de GUARDAR antes de que llegue la corrupción.',
+    'Con los tres datos bien (LEO, 4 y 3:08), solo falta guardar.',
+    'Pisa la plataforma verde de GUARDAR antes de que llegue la corrupción. No pises otras opciones por el camino: cambiarían el dato.',
     'GUARDAR está a la derecha, en la misma fila que las horas.',
   ],
   carga: [

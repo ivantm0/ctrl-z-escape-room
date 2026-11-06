@@ -94,7 +94,8 @@
     if (bi >= 0) {
       const bx = nx + dx;
       const by = ny + dy;
-      if (w.boxesDone || solid(bx, by) || boxAt(bx, by) >= 0 || at(bx, by) === 'O') return sfx('bump');
+      const toEntry = bx === WAREHOUSE.entry[0] && by === WAREHOUSE.entry[1];
+      if (w.boxesDone || solid(bx, by) || boxAt(bx, by) >= 0 || at(bx, by) === 'O' || toEntry) return sfx('bump');
       boxes[bi] = [bx, by];
       sfx('push');
       pixel.s.w3.x = nx;
@@ -120,7 +121,7 @@
     pixel.save();
     setTimeout(() => {
       sfx('item');
-      say(['Las tres marcas se iluminan bajo las cajas.', 'Una trampilla se abre en el suelo: dentro hay un engranaje.', '¡Has conseguido el ENGRANAJE DE BRONCE!']);
+      say(['Las cinco marcas se iluminan bajo las cajas.', 'Una trampilla se abre en el suelo: dentro hay un engranaje.', '¡Has conseguido el ENGRANAJE DE BRONCE!']);
     }, 150);
   }
 

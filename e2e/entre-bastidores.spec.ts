@@ -284,6 +284,25 @@ test.describe('pantalla 6 · memoria de guardado', () => {
     await expect(dialog(page)).toContainText('datos vacíos o incorrectos');
   });
 
+  test('al reiniciar se borran los datos y las pistas vuelven a ser las de los datos', async ({ page }) => {
+    await started(page, {
+      level: 6,
+      ends: [null, 1, 2, 3, 4, Date.now() - 1000],
+      done: [...DONE, 'datos'],
+      l6: { x: 10, y: 16, dir: 'up', turns: 0, sel: { jugador: 'LEO', mundo: '4', hora: '3:08' } },
+    });
+    await page.goto('/entre-bastidores');
+    const hints = page.getByRole('complementary', { name: 'Pistas' });
+    await page.getByRole('button', { name: 'Pistas' }).click();
+    await page.getByRole('button', { name: 'VER PISTA' }).click();
+    await expect(hints).toContainText('solo falta guardar');
+    await page.keyboard.press('r');
+    await expect(game(page)).toHaveAttribute('data-sel', '||');
+    await expect(hints).not.toContainText('solo falta guardar');
+    await page.getByRole('button', { name: 'VER PISTA' }).click();
+    await expect(hints).toContainText('ranura 3');
+  });
+
   test('la corrupción alcanza a Leo si se entretiene', async ({ page }) => {
     await onLevel6(page);
     await page.goto('/entre-bastidores');

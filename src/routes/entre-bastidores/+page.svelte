@@ -61,7 +61,7 @@
     <BHud />
     <main>
       <h1 class="sr-only">Fuera de Juego 2: Entre Bastidores, pantalla {level}: {LEVEL_NAMES[level]}</h1>
-      <p class="tip keys">Muévete con las flechas o WASD · A / Espacio para interactuar · R para {level === 1 ? 'recolocar los archivos' : level === 2 ? 'volver al principio' : level === 3 ? 'restablecer los ajustes' : level === 4 ? 'volver al inicio' : level === 5 ? 'rebobinar los créditos' : 'reiniciar la memoria'}</p>
+      <p class="tip keys">Muévete con las flechas o WASD · Espacio para interactuar · R para {level === 1 ? 'recolocar los archivos' : level === 2 ? 'volver al principio' : level === 3 ? 'restablecer los ajustes' : level === 4 ? 'volver al inicio' : level === 5 ? 'rebobinar los créditos' : 'reiniciar la memoria'}</p>
       <p class="tip touch">Cruceta para moverte · A para interactuar · ↺ {level === 1 ? 'recoloca los archivos' : level === 2 ? 'vuelve al principio' : level === 3 ? 'restablece los ajustes' : level === 4 ? 'vuelve al inicio' : level === 5 ? 'rebobina los créditos' : 'reinicia la memoria'}</p>
       {#if level === 1}
         <Level1 />

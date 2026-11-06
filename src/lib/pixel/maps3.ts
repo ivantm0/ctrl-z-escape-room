@@ -8,8 +8,9 @@
 // Reloj:    G máquina del reloj  O salida  (el portal aparece en PORTAL3)
 //
 // Espejos y almacén se generaron y comprobaron automáticamente:
-// espejos = 64 combinaciones, solo 4 válidas y todas usan al menos 4 espejos;
-// almacén = 3 cajas, 12 empujes y 25 pasos como mínimo (búsqueda en anchura).
+// espejos = 9 espejos (512 combinaciones) y una sola solución: hay que girar 6; los otros 3 son señuelos;
+// almacén = 5 cajas y 36 empujes como mínimo, unos 140 pasos (búsqueda inversa desde las metas
+// y comprobación hacia delante en anchura).
 
 export type Screen3 = 'plaza' | 'espejos' | 'almacen' | 'reloj';
 
@@ -39,17 +40,17 @@ export const MAPS3: Record<Screen3, string[]> = {
     '####################',
     '####################',
     '##................##',
-    '##o.....o.........##',
-    '##.......o........##',
     '##................##',
-    '##....o...........##',
+    '##.......o......o.##',
+    '##................##',
+    '##.............o..##',
     '#E................##',
+    '##.o........o.....##',
     '##................##',
-    '##..o.......o.o.o.##',
-    '##................##',
-    '##.......o........##',
-    '##................X#',
-    '##.o..............##',
+    '##o...............##',
+    '##...o............##',
+    '##..........o.....X#',
+    '##..oo.........o..##',
     '##########O#########',
     '####################',
     '####################',
@@ -60,13 +61,13 @@ export const MAPS3: Record<Screen3, string[]> = {
     '####################',
     '####################',
     '####################',
-    '######........######',
-    '######........######',
-    '######........######',
-    '######.#.#....######',
-    '######...#.##.######',
-    '######......#.######',
+    '######...##...######',
     '######..#.....######',
+    '######....#...######',
+    '######........######',
+    '#######.......######',
+    '######.#...#.#######',
+    '######........######',
     '#########.##########',
     '#########O##########',
     '####################',
@@ -98,14 +99,16 @@ export const MAPS3: Record<Screen3, string[]> = {
 
 /** Espejos del laboratorio: posición y orientación inicial ('/' o '\') */
 export const MIRRORS = {
-  pos: [[10, 11], [17, 8], [17, 3], [11, 13], [11, 3], [9, 4]] as [number, number][],
-  initial: ['\\', '\\', '/', '/', '\\', '\\'],
+  pos: [[13, 13], [15, 3], [8, 8], [10, 8], [8, 14], [16, 12], [6, 14], [16, 13], [6, 12]] as [number, number][],
+  initial: ['\\', '/', '/', '\\', '\\', '/', '/', '/', '\\'],
 };
 
 /** Almacén: cajas y marcas */
 export const WAREHOUSE = {
-  boxes: [[10, 10], [12, 6], [10, 9]] as [number, number][],
-  goals: [[7, 10], [8, 5], [9, 6]] as [number, number][],
+  boxes: [[8, 7], [8, 9], [9, 7], [9, 8], [9, 11]] as [number, number][],
+  goals: [[12, 9], [12, 10], [13, 6], [12, 7], [12, 6]] as [number, number][],
+  /** Pasillo de la entrada: Leo puede pisarlo, las cajas no */
+  entry: [9, 12] as [number, number],
 };
 
 /** Estatuas: orden en que brillan sus ojos de noche */

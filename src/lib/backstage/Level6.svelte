@@ -27,8 +27,15 @@
   const corrupted = (x: number, y: number) => !saved && l.turns >= corruptAt(x, y);
   const allRight = () => FIELDS.every((f) => l.sel[f] === SAVE_GOAL[f]);
 
+  /** «datos» solo cuenta mientras los tres datos estén bien (las pistas dependen de ello) */
+  function syncData() {
+    if (allRight()) backstage.complete('datos');
+    else backstage.s.done = backstage.s.done.filter((d) => d !== 'datos');
+  }
+
   function restart(lines: string[]) {
     Object.assign(backstage.s.l6, { ...START6, dir: 'up', turns: 0, sel: { jugador: '', mundo: '', hora: '' } });
+    syncData();
     backstage.save();
     sfx('crack');
     say([...lines, 'La memoria se reinicia y la corrupción vuelve a su rincón. (R también reinicia.)']);
@@ -57,7 +64,7 @@
     if (pad) {
       backstage.s.l6.sel[pad.field] = pad.value;
       sfx('rune');
-      if (allRight() && !backstage.isDone('datos')) backstage.complete('datos');
+      syncData();
     }
     if (at(nx, ny) === 'S') saveGame();
     backstage.save();
@@ -83,6 +90,7 @@
   function reset() {
     if (saved) return;
     Object.assign(backstage.s.l6, { ...START6, dir: 'up', turns: 0, sel: { jugador: '', mundo: '', hora: '' } });
+    syncData();
     backstage.save();
     sfx('door');
     say(['REINICIO DE MEMORIA: vuelves al principio y la corrupción, a su rincón.']);
