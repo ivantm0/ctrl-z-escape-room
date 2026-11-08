@@ -23,6 +23,9 @@ class Lvl:
         self.movers = []
         self.notes = []
         self.extra_floor = []  # casillas a tratar como suelo en el comprobador (p. ej. carro empujado)
+        self.dark = None        # radio de la luz propia del jugador (px); menos = más oscuro
+        self.shade = None       # velocidad de las sombras (px/fotograma)
+        self.lamp_out = False   # al entrar, la lámpara se apaga
 
     def carve(self, x0, y0, x1, y1, ch='.'):
         for y in range(y0, y1 + 1):
@@ -280,6 +283,321 @@ l.notes = [
 L.append(l)
 
 
+
+# ═════════════ Acto I: textos de terror ═════════════
+# Mismo trazado; cambian las frases y lo que dejaron escrito los muertos (en orden de lectura de las C).
+ACTO1 = [
+    ('Algo se ha derrumbado. Algo, en la oscuridad, sigue respirando.',
+     ['«No fue el grisú. Oí la mecha. Ventura cerró la galería con nosotros dentro. Y luego empezó el canto.» — Ramiro']),
+    ('Tomás nunca dejaba que su lámpara se apagara. Ahora sabes por qué.',
+     ['«Ha vuelto a pasar por aquí. No hace ruido al andar, pero se le oye respirar justo detrás de la oreja.»',
+      '«Tomás. Tiene la lámpara encendida en la mano y los ojos abiertos. No hay ni un rasguño en su cuerpo.»']),
+    ('La roca cede si sabes dónde golpear. Lo que hay detrás no siempre quiere salir.',
+     ['«Dicen que el grisú huele a manzanas podridas. Esto huele a otra cosa. A iglesia cerrada.»',
+      '«Antonio. Escarbó la roca hasta dejarse las uñas. Escribió con sangre: NO ESTÁ MUERTO EL QUE CANTA.»']),
+    ('Las plataformas siguen moviéndose. Nadie las empuja.',
+     ['«Saltó. Juraba que algo le agarraba del tobillo desde el fondo del foso.»']),
+    ('Las perforadoras se encendieron solas tras la explosión.',
+     ['«Las barrenas llevan el ritmo de algo. Como un corazón muy grande y muy lento.»']),
+    ('Aquí se pesaba el mineral. Ahora pesa otra cosa.',
+     ['«La báscula marca peso cuando no hay nada encima. Mucho peso.» — J.']),
+    ('Alguien tiene que tirar de la palanca. Alguien que no seas tú.',
+     ['«Si subes, no mires la cuerda del montacargas. No está atada a nada.» — J.']),
+    ('Oro. Tanto oro. Y nadie vivo para llevárselo.',
+     ['«El filón madre está más abajo. Lo oímos cantar. Cantaba con nuestras voces.»',
+      '«Llevaba los bolsillos llenos de pepitas. También la boca.»']),
+    ('Si sopla aire, hay salida. Si respira, no.',
+     ['«Sopla aire de arriba. No es aire. Es algo que respira desde la boca de la mina.» — J.']),
+    ('La galería está sellada. Desde fuera.',
+     ['«Ventura selló la mina por fuera, a propósito. “Mejor cuarenta que el pueblo entero”, dijo.»',
+      '«La compuerta sube el puente con peso. Usad la vagoneta. Y no os quedéis quietos mucho rato.»']),
+]
+for lv, (line, notes) in zip(L, ACTO1):
+    lv.line = line
+    lv.notes = notes
+
+
+def corridor(l, x0, x1, y0, y1):
+    l.carve(x0, y0, x1, y1)
+
+
+def pit(l, x0, x1, floor):
+    """Foso en el suelo `floor` con pinchos en el fondo (fila floor+1)."""
+    l.carve(x0, floor, x1, floor)
+    l.carve(x0, floor + 1, x1, floor + 1, '^')
+
+
+# ═════════════ Acto II: hacia abajo, y de vuelta ═════════════
+
+# ───────────── 11 · Los pozos viejos ─────────────
+l = Lvl('Los pozos viejos', 'La única salida es hacia abajo. Por donde vino el canto.')
+l.dark = 40
+corridor(l, 1, 28, 2, 4)
+pit(l, 10, 11, 5)
+l.carve(17, 3, 18, 4, '#')
+l.carve(26, 5, 27, 7)
+corridor(l, 1, 28, 8, 10)
+pit(l, 19, 20, 11)
+l.carve(8, 11, 12, 11); l.carve(8, 12, 12, 12, '^')
+for x in (9, 10, 11): l.put(x, 11, '=')
+l.carve(2, 11, 3, 13)
+corridor(l, 1, 28, 14, 16)
+pit(l, 20, 21, 17)
+l.movers.append(dict(kind='spikes', x=12, y=16, w=3, period=150, up=50, warn=30))
+l.put(2, 4, 'P'); l.put(3, 4, 'L')
+l.put(28, 15, 'S'); l.put(28, 16, 'S')
+l.put(24, 9, 'M')
+l.put(14, 4, 'C'); l.put(15, 16, 'C')
+l.put(22, 4, 'G'); l.put(5, 10, 'G')
+l.notes = [
+    '«Bajamos a buscar a los que faltaban. Volvimos menos. Siempre volvemos menos.»',
+    '«Le vi la cara a la sombra. Era la cara de mi hermano. Mi hermano murió en el 19.» — J.',
+]
+L.append(l)
+
+# ───────────── 12 · La capilla ─────────────
+l = Lvl('La capilla', 'Los viejos decían que la mina no se llamaba así por la capilla del pueblo.')
+l.dark = 38
+corridor(l, 1, 28, 2, 4)
+pit(l, 12, 13, 5)
+l.ladder(27, 5, 10)
+corridor(l, 1, 28, 7, 10)
+for x0 in (10, 16): l.carve(x0, 10, x0 + 1, 10, '#')   # bancos
+for x in (8, 14, 20): l.carve(x, 7, x, 8, '#')        # columnas colgantes
+l.ladder(2, 11, 16)
+corridor(l, 1, 28, 14, 16)
+l.carve(7, 17, 12, 17); l.carve(7, 18, 12, 18, '^')
+for x in (8, 9, 10, 11): l.put(x, 17, '=')
+l.put(4, 10, 'K')
+l.movers += [
+    dict(kind='platform', x=18, y=14, w=1, h=3, path=[[0, 0], [0, -3]], speed=1, trigger=0),
+    dict(kind='spikes', x=22, y=16, w=3, period=140, up=50, warn=28),
+]
+l.put(2, 4, 'P'); l.put(14, 10, 'L')
+l.put(28, 15, 'S'); l.put(28, 16, 'S')
+l.put(6, 15, 'M'); l.put(24, 8, 'M')
+l.put(12, 10, 'C')
+l.put(20, 4, 'G'); l.put(25, 16, 'G')
+l.notes = ['«Hay una capilla aquí abajo. Más vieja que la mina. Más vieja que el pueblo. El altar está mirando hacia abajo.»']
+L.append(l)
+
+# ───────────── 13 · El osario ─────────────
+l = Lvl('El osario', 'Aquí abajo ya había muertos antes de que llegáramos.')
+l.dark = 36
+corridor(l, 1, 28, 2, 4)
+l.carve(10, 2, 10, 4, 'X')
+pit(l, 16, 17, 5)
+l.put(25, 5, 'X'); l.carve(25, 6, 25, 7)
+corridor(l, 1, 28, 8, 10)
+pit(l, 15, 16, 11)
+l.put(4, 11, 'X'); l.carve(4, 12, 4, 13)
+corridor(l, 1, 28, 14, 16)
+l.carve(15, 14, 15, 16, 'X')
+pit(l, 20, 21, 17)
+l.movers += [
+    dict(kind='spikes', x=19, y=10, w=3, period=130, up=50, warn=25),
+    dict(kind='spikes', x=10, y=10, w=3, period=130, up=50, warn=25, phase=65),
+    dict(kind='spikes', x=8, y=16, w=4, period=130, up=50, warn=25),
+]
+l.put(2, 4, 'P'); l.put(4, 4, 'T'); l.put(22, 10, 'L')
+l.put(28, 15, 'S'); l.put(28, 16, 'S')
+l.put(15, 3, 'M'); l.put(22, 15, 'M')
+l.put(7, 4, 'C'); l.put(24, 10, 'C'); l.put(25, 16, 'C')
+l.put(13, 4, 'G'); l.put(7, 10, 'G'); l.put(18, 16, 'G')
+l.notes = [
+    '«Huesos. Cientos. Con cascos de cuero, de antes de la Compañía. Todos con la cabeza hacia la misma pared.»',
+    '«Si te sigue, no corras hacia la oscuridad. Corre hacia la luz. Siempre hacia la luz.» — J.',
+    '«No es una sombra. Es un agujero con forma de hombre.»',
+]
+L.append(l)
+
+# ───────────── 14 · Los murmullos ─────────────
+l = Lvl('Los murmullos', 'Las voces dicen tu nombre. Lo dicen bien.')
+l.dark = 34
+corridor(l, 1, 8, 2, 4)
+l.carve(9, 2, 23, 16)
+l.carve(9, 17, 23, 17, '^')
+corridor(l, 1, 8, 11, 16)
+for (x0, x1, y) in [(10, 11, 7), (15, 16, 9), (16, 17, 13), (12, 13, 15)]:
+    for x in range(x0, x1 + 1): l.put(x, y, '=')
+l.carve(20, 11, 21, 11, '#')
+l.put(2, 4, 'P'); l.put(5, 4, 'L'); l.put(21, 10, 'L')
+l.put(1, 15, 'S'); l.put(1, 16, 'S')
+l.put(16, 3, 'M'); l.put(19, 15, 'M'); l.put(4, 14, 'M')
+l.put(3, 4, 'C')
+l.put(16, 8, 'G'); l.put(3, 16, 'G')
+l.notes = ['«Contestad solo si os llaman por el apodo. El nombre de verdad lo sabe cualquiera.» — J.']
+L.append(l)
+
+# ───────────── 15 · La galería romana ─────────────
+l = Lvl('La galería romana', 'Alguien excavó esto hace dos mil años. Y lo tapió por dentro.')
+l.dark = 34
+corridor(l, 1, 28, 2, 4)
+l.carve(9, 5, 10, 5, '_')
+l.carve(20, 5, 21, 7)            # trampilla
+corridor(l, 1, 28, 8, 10)
+pit(l, 5, 17, 11)
+l.ladder(2, 11, 16)
+corridor(l, 1, 28, 14, 16)
+l.carve(14, 17, 15, 17, '_')
+l.carve(18, 17, 24, 17); l.carve(18, 18, 24, 18, '^')
+# lectura: placa alta (fila 5) = 0, placa baja (fila 17) = 1
+l.movers += [
+    dict(kind='platform', x=20, y=5, w=2, h=1.0625, path=[[0, 0], [2, 0]], speed=0.5, trigger=0),
+    dict(kind='platform', x=6, y=11, w=2, path=[[0, 0], [10, 0]], speed=0.7, wait=40),
+    dict(kind='platform', x=18, y=19, w=7, path=[[0, 0], [0, -2]], speed=0.5, trigger=1),
+    dict(kind='spikes', x=26, y=16, w=2, period=120, up=45, warn=25),
+]
+l.put(2, 4, 'P'); l.put(5, 4, 'B'); l.put(10, 16, 'B'); l.put(24, 10, 'L')
+l.put(28, 15, 'S'); l.put(28, 16, 'S')
+l.put(14, 3, 'M'); l.put(10, 9, 'M')
+l.put(24, 4, 'C'); l.put(4, 16, 'C')
+l.put(18, 10, 'G'); l.put(27, 4, 'G')
+l.notes = [
+    '«En la pared hay letras latinas raspadas. Una palabra se repite: CANIT. “Canta”.»',
+    '«La trampilla de arriba solo se abre con peso. Él también pesa. Cuidado con dónde lo dejas pisar.» — J.',
+]
+L.append(l)
+
+# ───────────── 16 · El que canta ─────────────
+l = Lvl('El que canta', 'Por fin lo oyes de cerca. Tiene tu voz.')
+l.dark = 30
+l.shade = 0.6
+corridor(l, 15, 28, 2, 4)
+l.carve(7, 2, 14, 16)
+l.carve(7, 17, 14, 17, '^')
+corridor(l, 1, 6, 11, 16)
+for x in (8, 9, 10): l.put(x, 15, '=')
+l.movers += [
+    dict(kind='platform', x=12, y=5, w=2, path=[[0, 0], [0, 10]], speed=0.6, wait=60, light=True),
+    dict(kind='spikes', x=18, y=4, w=3, period=130, up=45, warn=25),
+]
+l.put(27, 4, 'P'); l.put(22, 4, 'L')
+l.put(1, 15, 'S'); l.put(1, 16, 'S')
+l.put(10, 3, 'M'); l.put(3, 15, 'M'); l.put(26, 3, 'M')
+l.put(4, 16, 'C'); l.put(16, 4, 'C')
+l.put(9, 14, 'G'); l.put(5, 16, 'G')
+l.notes = [
+    '«Aquí está. No tiene forma. Es el filón. Canta para que bajemos, y bajamos. Ventura lo sabía. Por eso cerró.» — J.',
+    '«Ya he estado aquí. Reconozco mi letra en las notas. No recuerdo haberlas escrito.»',
+]
+L.append(l)
+
+# ───────────── 17 · Sin luz ─────────────
+l = Lvl('Sin luz', 'Tu lámpara se apagó sola al pasar junto a él. Solo quedan bengalas.')
+l.dark = 24
+l.lamp_out = True
+corridor(l, 1, 28, 14, 16)
+l.carve(18, 17, 22, 17); l.carve(18, 18, 22, 18, '^')
+for x in (19, 20, 21): l.put(x, 17, '=')
+l.ladder(2, 11, 16)
+corridor(l, 1, 28, 8, 10)
+l.carve(10, 11, 14, 11); l.carve(10, 12, 14, 12, '^')
+for x in (11, 12, 13): l.put(x, 11, '=')
+l.ladder(27, 5, 10)
+corridor(l, 1, 28, 2, 4)
+l.carve(14, 5, 18, 5); l.carve(14, 6, 18, 6, '^')
+for x in (15, 16, 17): l.put(x, 5, '=')
+l.movers.append(dict(kind='spikes', x=19, y=10, w=3, period=140, up=50, warn=28))
+l.put(27, 16, 'P'); l.put(25, 16, 'F'); l.put(5, 10, 'F'); l.put(23, 4, 'F')
+l.put(1, 3, 'S'); l.put(1, 4, 'S')
+l.put(10, 15, 'M'); l.put(20, 9, 'M'); l.put(8, 3, 'M')
+l.put(14, 16, 'C')
+l.put(6, 16, 'G'); l.put(24, 10, 'G'); l.put(10, 4, 'G')
+l.notes = ['«Cuando no veas nada, cuenta sus pasos. Da siete y se para. Da siete y se para.» — J.']
+L.append(l)
+
+# ───────────── 18 · La cuerda ─────────────
+l = Lvl('La cuerda', 'Arriba. Siempre arriba. No mires abajo: algo sube detrás.')
+l.dark = 30
+l.shade = 0.6
+corridor(l, 1, 26, 15, 16)
+l.carve(27, 15, 28, 16); l.ladder(27, 9, 16)
+corridor(l, 1, 28, 9, 10)
+pit(l, 6, 15, 11)
+l.ladder(1, 3, 10)
+corridor(l, 2, 28, 3, 4)
+l.movers += [
+    dict(kind='spikes', x=8, y=16, w=3, period=130, up=50, warn=25),
+    dict(kind='spikes', x=17, y=16, w=3, period=130, up=50, warn=25, phase=65),
+    dict(kind='platform', x=6, y=11, w=2, path=[[0, 0], [8, 0]], speed=0.7, wait=40, light=True),
+    dict(kind='spikes', x=20, y=10, w=3, period=120, up=45, warn=25),
+    dict(kind='spikes', x=9, y=4, w=3, period=120, up=45, warn=25),
+    dict(kind='spikes', x=17, y=4, w=3, period=120, up=45, warn=25, phase=60),
+]
+l.put(2, 16, 'P'); l.put(12, 16, 'L')
+l.put(28, 3, 'S'); l.put(28, 4, 'S')
+l.put(24, 15, 'M'); l.put(4, 9, 'M'); l.put(22, 3, 'M')
+l.put(5, 16, 'C'); l.put(25, 10, 'C')
+l.put(23, 16, 'G'); l.put(3, 10, 'G'); l.put(14, 4, 'G')
+l.notes = [
+    '«La cuerda del montacargas baja hasta el filón. Algo tira de ella desde abajo, despacio, cada noche.»',
+    '«No te pares en las escaleras. Ahí es donde te alcanza.» — J.',
+]
+L.append(l)
+
+# ───────────── 19 · Las Ánimas ─────────────
+l = Lvl('Las Ánimas', 'Cuarenta hombres bajaron. Cuarenta sombras suben contigo.')
+l.dark = 28
+l.shade = 0.62
+corridor(l, 1, 28, 14, 16)
+l.carve(8, 14, 8, 16, 'X')
+l.carve(15, 17, 16, 17, '_')
+l.carve(18, 17, 24, 17); l.carve(18, 18, 24, 18, '^')
+l.ladder(27, 11, 16)
+corridor(l, 1, 28, 8, 10)
+l.carve(13, 11, 20, 11); l.carve(13, 12, 20, 12, '^')
+for x in (14, 15, 18, 19): l.put(x, 11, '=')
+l.ladder(2, 5, 10)
+corridor(l, 1, 28, 2, 4)
+pit(l, 10, 17, 5)
+l.put(5, 4, 'K')
+# lectura: palanca (fila 4) = 0, placa (fila 17) = 1
+l.movers += [
+    dict(kind='platform', x=26, y=2, w=1, h=3, path=[[0, 0], [0, -3]], speed=1, trigger=0),
+    dict(kind='platform', x=18, y=19, w=7, path=[[0, 0], [0, -2]], speed=0.5, trigger=1),
+    dict(kind='spikes', x=7, y=10, w=3, period=120, up=45, warn=25),
+    dict(kind='platform', x=10, y=5, w=2, path=[[0, 0], [6, 0]], speed=0.7, wait=40, light=True),
+    dict(kind='spikes', x=21, y=4, w=3, period=120, up=45, warn=25, phase=60),
+]
+l.put(2, 16, 'P'); l.put(4, 16, 'T'); l.put(11, 16, 'B'); l.put(25, 10, 'L')
+l.put(28, 3, 'S'); l.put(28, 4, 'S')
+l.put(20, 15, 'M'); l.put(24, 9, 'M'); l.put(6, 9, 'M'); l.put(15, 3, 'M')
+l.put(5, 16, 'C'); l.put(11, 10, 'C'); l.put(18, 4, 'C')
+l.put(13, 16, 'G'); l.put(22, 10, 'G'); l.put(24, 4, 'G')
+l.notes = [
+    '«Ventura. El capataz. Bajó a sellar el filón con dinamita y el filón lo selló a él.»',
+    '«Las sombras no son el monstruo. Son los que bajaron. Te siguen porque eres el único que sabe subir.»',
+    '«Si llegas arriba, no mires el nombre de la lápida.» — J.',
+]
+L.append(l)
+
+# ───────────── 20 · La boca ─────────────
+l = Lvl('La boca', 'Arriba se ve el cielo. Abajo, todo lo que viene detrás.')
+l.dark = 26
+l.shade = 0.72
+l.carve(3, 1, 26, 15)
+l.carve(3, 16, 17, 16, '^')
+l.carve(18, 16, 26, 16)
+l.carve(27, 13, 28, 16)
+for (x0, x1, y, ch) in [(20, 23, 15, '#'), (16, 18, 13, '#'), (20, 22, 11, '='), (16, 18, 9, '#'),
+                        (20, 22, 7, '='), (16, 18, 5, '#'), (12, 14, 4, '=')]:
+    l.carve(x0, y, x1, y, ch)
+l.carve(3, 4, 10, 4, '#')
+l.movers += [
+    dict(kind='spikes', x=16, y=12, w=3, period=130, up=40, warn=25, phase=65),
+    dict(kind='spikes', x=16, y=8, w=3, period=130, up=40, warn=25),
+    dict(kind='spikes', x=6, y=3, w=2, period=120, up=40, warn=25),
+]
+l.put(27, 16, 'P'); l.put(25, 16, 'L'); l.put(26, 16, 'F'); l.put(17, 4, 'L')
+l.put(4, 2, 'S'); l.put(4, 3, 'S')
+l.put(10, 14, 'M'); l.put(5, 8, 'M'); l.put(24, 3, 'M'); l.put(12, 9, 'M')
+l.put(22, 14, 'C')
+l.put(13, 3, 'G'); l.put(9, 3, 'G')
+l.notes = ['«Si lees esto, ya has subido antes. Y has vuelto a bajar. No subas, Julián.» — J.']
+L.append(l)
+
+
 # ═════════════ Comprobador ═════════════
 
 def check(l, verbose=False):
@@ -319,7 +637,7 @@ def check(l, verbose=False):
                 return True
             if (x, y) in l.extra_floor:
                 return True
-            return c == '#' or (c == 'X' and not have_pick) or (c == '=' and have_lamp)
+            return c == '#' or (c == 'X' and not have_pick) or (c == '=' and have_lamp)  # M (sombra) = hueco
 
         def deadly(x, y):
             return 0 <= y < H and 0 <= x < W and g[y][x] == '^'
@@ -396,7 +714,7 @@ def check(l, verbose=False):
                     seen.add(n)
                     todo.append(n)
         cells = {g[y][x] for (x, y) in seen}
-        np, nl = 'T' in cells or have_pick, 'L' in cells or have_lamp
+        np, nl = 'T' in cells or have_pick, 'L' in cells or 'F' in cells or have_lamp
         if (np, nl) == (have_pick, have_lamp):
             break
         have_pick, have_lamp = np, nl

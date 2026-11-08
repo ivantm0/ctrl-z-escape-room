@@ -25,6 +25,8 @@
   /** fuel: aceite que le queda a un farol soltado (los del mapa vienen llenos) */
   type Item = { kind: 'L' | 'F' | 'T' | 'G'; x: number; y: number; fuel?: number };
   type Corpse = { tx: number; ty: number; note: string; flip: boolean };
+  /** Sombra: atraviesa la roca, persigue al jugador y huye de la luz fuerte */
+  type Shade = { x: number; y: number; sx: number; sy: number; fleeing: boolean; phase: number };
   /** hold: fotogramas que lleva activo su interruptor (para el retardo) */
   type Plat = Body & { def: PlatformDef; s: number; len: number; hold?: number };
   type Switch = { kind: 'plate' | 'lever'; tx: number; ty: number; w: number; on: boolean };
@@ -55,6 +57,11 @@
   let switches: Switch[] = [];
   let items: Item[] = [];
   let corpses: Corpse[] = [];
+  let shades: Shade[] = [];
+  const SHADE_W = 10;
+  const SHADE_H = 13;
+  /** Aviso la primera vez que una sombra se acerca (se recuerda en este navegador) */
+  const SHADE_KEY = 'oscuras-sombra-vista';
   /** Escalera: trepando (sin gravedad) */
   let climbing = false;
   /** El jugador está sobre o dentro de una escalera (las flechas arriba trepan en vez de saltar) */
@@ -98,6 +105,11 @@
   /** enter=true al llegar a una pantalla nueva; false al reiniciar la actual */
   function load(i: number, enter = false) {
     if (enter) {
+      // Algunas galerías te apagan la lámpara al entrar
+      if (levels[i].lampOut) {
+        carrying = false;
+        fuel = 0;
+      }
       checkpoint = { carrying, fuel, flares, hasPick, gold, taken: [...taken] };
       stains = [];
       banner = { n: i + 1, name: levels[i].name, line: levels[i].line };
@@ -115,7 +127,8 @@
     t = 0;
     levelIdx = i;
     const lvl = levels[i];
-    grid = lvl.grid.map((r) => r.replace(/[PBLFK_TGC]/g, '.'));
+    grid = lvl.grid.map((r) => r.replace(/[PBLFK_TGCM]/g, '.'));
+    shades = [];
     boxes = [];
     items = [];
     corpses = [];
@@ -129,6 +142,7 @@
         if (c === 'B') boxes.push({ x: x * TILE, y: y * TILE, w: TILE, h: TILE, vx: 0, vy: 0, ground: false });
         if ((c === 'L' || c === 'F' || c === 'T' || c === 'G') && !taken.has(`${i}:${x}:${y}`))
           items.push({ kind: c, x: x * TILE, y: y * TILE });
+        if (c === 'M') shades.push({ x: x * TILE + 3, y: y * TILE + 2, sx: x * TILE + 3, sy: y * TILE + 2, fleeing: false, phase: x * 7 + y });
         if (c === 'C') corpses.push({ tx: x, ty: y, note: lvl.notes?.[noteIdx++] ?? '', flip: (x + y) % 2 === 0 });
         // Varias _ seguidas forman una sola placa
         if (c === '_' && row[x - 1] === '_') switches[switches.length - 1].w++;
@@ -199,6 +213,9 @@
     const ty = Math.floor(py / TILE);
     return !ladderAt(px, py - TILE) && prevBottom <= ty * TILE + 0.01;
   };
+
+  /** Luz propia del jugador (lo que ve sin lámpara): cada galería puede ser más oscura */
+  const ownLight = () => levels[levelIdx].dark ?? 42;
 
   /** Radio del farol que llevas: se encoge al quedarse sin aceite */
   const lanternR = () => 80 * Math.min(1, fuel / FADE);
@@ -339,6 +356,64 @@
     return 'up';
   }
 
+  // ---------- Sombras ----------
+
+  function updateShades() {
+    // Al entrar o reaparecer, un respiro antes de que empiecen a moverse
+    if (t < 90) return;
+    const speed = levels[levelIdx].shade ?? 0.5;
+    const px = player.x + player.w / 2;
+    const py = player.y + player.h / 2;
+    for (const sh of shades) {
+      const cx = sh.x + SHADE_W / 2;
+      const cy = sh.y + SHADE_H / 2;
+      // ¿Le da una luz fuerte (lámpara, bengala)? Entonces huye de ella
+      let fx = 0;
+      let fy = 0;
+      for (const l of strongLights()) {
+        const d = Math.hypot(cx - l.x, cy - l.y);
+        if (d < l.r * 0.95 && d > 0.01) {
+          fx += (cx - l.x) / d;
+          fy += (cy - l.y) / d;
+        }
+      }
+      sh.fleeing = fx !== 0 || fy !== 0;
+      let dx: number;
+      let dy: number;
+      let v: number;
+      if (sh.fleeing) {
+        dx = fx;
+        dy = fy;
+        v = 1.3;
+      } else {
+        dx = px - cx;
+        dy = py - cy;
+        v = speed;
+      }
+      const len = Math.hypot(dx, dy) || 1;
+      // Un leve vaivén para que no avance en línea recta
+      const wob = Math.sin((t + sh.phase * 13) / 20) * 0.35;
+      sh.x += (dx / len) * v + (-dy / len) * wob;
+      sh.y += (dy / len) * v + (dx / len) * wob;
+      sh.x = Math.max(-8, Math.min(W - 2, sh.x));
+      sh.y = Math.max(-8, Math.min(H - 2, sh.y));
+      // Tocarla es morir
+      const hit: Body = { x: sh.x + 2, y: sh.y + 2, w: SHADE_W - 4, h: SHADE_H - 4, vx: 0, vy: 0, ground: false };
+      if (overlap(player, hit)) crushed = true;
+      if (!shadeWarned && Math.hypot(px - cx, py - cy) < 110) warnShade();
+    }
+  }
+
+  let shadeWarned = false;
+  function warnShade() {
+    shadeWarned = true;
+    try {
+      if (localStorage.getItem(SHADE_KEY) === '1') return;
+      localStorage.setItem(SHADE_KEY, '1');
+    } catch {}
+    showHint('Algo se mueve en la oscuridad y atraviesa la roca. No soporta la luz de la lámpara ni de las bengalas.', 7);
+  }
+
   // ---------- Bucle ----------
 
   // ---------- Muerte y sangre ----------
@@ -397,6 +472,7 @@
     updateSwitches();
     crushed = false;
     updatePlats();
+    updateShades();
     if (crushed) return die();
 
     const left = keys.has('ArrowLeft') || keys.has('a');
@@ -607,7 +683,7 @@
   function lights() {
     const flicker = Math.sin(t / 7) * 1.5 + Math.sin(t / 3.1) * 0.8;
     const list: { x: number; y: number; r: number }[] = [
-      { x: player.x + player.w / 2, y: player.y + player.h / 2, r: (carrying ? Math.max(42, lanternR()) : 42) + flicker },
+      { x: player.x + player.w / 2, y: player.y + player.h / 2, r: (carrying ? Math.max(ownLight(), lanternR()) : ownLight()) + flicker },
     ];
     for (const it of items) if (it.kind === 'L') list.push({ x: it.x + 8, y: it.y + 8, r: 72 + flicker });
     for (const p of plats) if (p.def.light) list.push({ x: p.x + p.w / 2, y: p.y, r: 40 + flicker });
@@ -921,6 +997,22 @@
 
     if (!dying) drawPlayer(ctx);
 
+    // Sombras: un hueco negro con forma de hombre, que solo se distingue a la luz
+    for (const sh of shades) {
+      const x = sh.x;
+      const y = sh.y;
+      ctx.fillStyle = 'rgba(0,0,0,0.92)';
+      ctx.beginPath();
+      ctx.ellipse(x + SHADE_W / 2, y + 4, 4, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x, y + SHADE_H + 2);
+      ctx.lineTo(x + 2, y + 6);
+      ctx.lineTo(x + SHADE_W - 2, y + 6);
+      ctx.lineTo(x + SHADE_W, y + SHADE_H + 2);
+      ctx.fill();
+    }
+
     // Máscara de oscuridad
     const l = light.getContext('2d')!;
     l.globalCompositeOperation = 'source-over';
@@ -949,6 +1041,14 @@
     for (const sw of switches) {
       ctx.fillStyle = sw.on ? 'rgba(120,230,140,0.9)' : 'rgba(230,110,90,0.7)';
       ctx.fillRect(sw.tx * TILE + (sw.w * TILE) / 2 - 1, sw.ty * TILE + (sw.kind === 'plate' ? 10 : 2), 2, 2);
+    }
+    // Los ojos de las sombras se ven siempre, aunque no veas nada más
+    for (const sh of shades) {
+      const blink = (t + sh.phase * 31) % 200 < 6;
+      if (blink) continue;
+      ctx.fillStyle = sh.fleeing ? 'rgba(160,40,40,0.5)' : 'rgba(255,60,50,0.95)';
+      ctx.fillRect(Math.round(sh.x) + 2, Math.round(sh.y) + 3, 2, 1);
+      ctx.fillRect(Math.round(sh.x) + 6, Math.round(sh.y) + 3, 2, 1);
     }
     for (const it of items)
       if (it.kind === 'G' && (t + it.x * 3) % 140 < 6) {
@@ -1040,6 +1140,7 @@
           hasPick,
           gold,
           climbing,
+          shades: shades.map((sh) => ({ x: sh.x, y: sh.y, fleeing: sh.fleeing })),
           flares,
           t,
         }),
@@ -1072,10 +1173,15 @@
     {carrying ? `Lámpara ${Math.ceil(fuel / 60)} s` : 'Sin lámpara'}{hasPick ? ' · Pico' : ''}{flares ? ` · Bengalas: ${flares}` : ''}{flareTime > 0 ? ' (ardiendo)' : ''} · Caídas: {deaths}
   </p>
   {#if done}
-    <p class="win">
-      La última galería se abre… pero el túnel no sube hacia la boca de la mina: baja. Muy hondo, alguien golpea la roca.
-      <br />Continuará.
-    </p>
+    <div class="win">
+      <p>Sales a la noche. No hay luna. El pueblo está a oscuras y en silencio, como si nadie hubiera vivido nunca allí.</p>
+      <p>
+        En la capilla hay una lápida nueva con cuarenta nombres. El último es el tuyo: <em>Julián Arias, 1909 – 1923</em>.
+      </p>
+      <p>A sus pies, escrita con carbón y con tu letra, una nota todavía tibia: <strong>«No subas.»</strong></p>
+      <p>Abajo, muy hondo, algo empieza a cantar tu nombre.</p>
+      <p class="fin">FIN</p>
+    </div>
   {/if}
 </div>
 
@@ -1166,6 +1272,24 @@
     margin: 0;
   }
   .win {
-    color: #ffcf6b;
+    max-width: 40rem;
+    display: grid;
+    gap: 0.6rem;
+    padding: 1.2rem 1.4rem;
+    color: #e8dcc6;
+    background: #0d0909;
+    border-left: 3px solid #8a1c1c;
+    line-height: 1.6;
+  }
+  .win p {
+    margin: 0;
+  }
+  .win strong {
+    color: #ff6b5a;
+  }
+  .fin {
+    letter-spacing: 0.4em;
+    color: #8a1c1c;
+    font-weight: 700;
   }
 </style>

@@ -1,5 +1,5 @@
 /**
- * Niveles de «A Oscuras · La mina». Cada galería es una pantalla de 30×20 casillas de 16 px.
+ * Galerías de «A Oscuras · La mina de Las Ánimas». Cada galería es una pantalla de 30×20 casillas de 16 px.
  *
  * Generado desde el diseño con comprobador de rutas (todas las salidas y pepitas alcanzables).
  *
@@ -16,6 +16,7 @@
  * _  placa de presión (activa con jugador o vagoneta encima). Va en un hueco del suelo
  *    de 2 casillas: la vagoneta cae dentro y ya no se sale
  * K  palanca (E para alternar)
+ * M  sombra: atraviesa la roca y te persigue; huye de la lámpara y de las bengalas. Tocarla es morir
  *
  * Elementos móviles (`movers`), en coordenadas de casilla (se admiten decimales):
  * - platform: sólida, transporta a quien esté encima. Sin `trigger` va y viene
@@ -74,13 +75,19 @@ export type Level = {
   movers?: MoverDef[];
   /** Lo que dejaron escrito los mineros caídos (una por C, en orden de lectura) */
   notes?: string[];
+  /** Radio de la luz propia del jugador, en px (por defecto 42): menos = más oscuro */
+  dark?: number;
+  /** Velocidad de las sombras, en px por fotograma (por defecto 0.5) */
+  shade?: number;
+  /** Al entrar, la lámpara que llevaras se apaga */
+  lampOut?: boolean;
 };
 
 export const levels: Level[] = [
   // 1 · El derrumbe
   {
     name: 'El derrumbe',
-    line: 'Todo se ha venido abajo. Arriba, en algún sitio, sigue habiendo aire.',
+    line: 'Algo se ha derrumbado. Algo, en la oscuridad, sigue respirando.',
     grid: [
       '##############################',
       '##############################',
@@ -104,13 +111,13 @@ export const levels: Level[] = [
       '##############################',
     ],
     notes: [
-      '«Si alguien lee esto: la escalera del fondo aguanta. Subid. Yo ya no puedo con la pierna.» — Ramiro',
+      '«No fue el grisú. Oí la mecha. Ventura cerró la galería con nosotros dentro. Y luego empezó el canto.» — Ramiro',
     ],
   },
   // 2 · La lámpara de Tomás
   {
     name: 'La lámpara de Tomás',
-    line: 'Tomás nunca dejaba que su lámpara se apagara.',
+    line: 'Tomás nunca dejaba que su lámpara se apagara. Ahora sabes por qué.',
     grid: [
       '##############################',
       '##############################',
@@ -134,14 +141,14 @@ export const levels: Level[] = [
       '##############################',
     ],
     notes: [
-      '«Tomás. Su lámpara sigue caliente. Siempre decía que el mineral azul “contesta” a la luz.»',
-      '«Las vetas aguantan mientras las alumbras. No te pares a mirar abajo.» — garabateado con carbón',
+      '«Ha vuelto a pasar por aquí. No hace ruido al andar, pero se le oye respirar justo detrás de la oreja.»',
+      '«Tomás. Tiene la lámpara encendida en la mano y los ojos abiertos. No hay ni un rasguño en su cuerpo.»',
     ],
   },
   // 3 · El pico
   {
     name: 'El pico',
-    line: 'La roca cede si sabes dónde golpear.',
+    line: 'La roca cede si sabes dónde golpear. Lo que hay detrás no siempre quiere salir.',
     grid: [
       '##############################',
       '##############################',
@@ -165,8 +172,8 @@ export const levels: Level[] = [
       '##############################',
     ],
     notes: [
-      '«Antonio. Agarra todavía el pico. Tenía las uñas negras de escarbar.»',
-      '«Dicen que el grisú no avisa. Mentira: avisa. Huele a manzanas podridas.»',
+      '«Dicen que el grisú huele a manzanas podridas. Esto huele a otra cosa. A iglesia cerrada.»',
+      '«Antonio. Escarbó la roca hasta dejarse las uñas. Escribió con sangre: NO ESTÁ MUERTO EL QUE CANTA.»',
     ],
   },
   // 4 · Vía muerta
@@ -202,13 +209,13 @@ export const levels: Level[] = [
       { kind: 'platform', x: 10, y: 8, w: 2, path: [[0, 0], [6, 0]], speed: 0.7, wait: 40 },
     ],
     notes: [
-      '«Se cayó del carro intentando saltar. Las plataformas pasan cada poco; hay que esperar.»',
+      '«Saltó. Juraba que algo le agarraba del tobillo desde el fondo del foso.»',
     ],
   },
   // 5 · Las barrenas
   {
     name: 'Las barrenas',
-    line: 'Las perforadoras se pusieron en marcha solas tras la explosión.',
+    line: 'Las perforadoras se encendieron solas tras la explosión.',
     grid: [
       '##############################',
       '##############################',
@@ -244,13 +251,13 @@ export const levels: Level[] = [
       { kind: 'spikes', x: 24, y: 6, w: 3, period: 160, up: 60, warn: 30, phase: 120 },
     ],
     notes: [
-      '«Las barrenas siguen un ritmo. Cuenta. Cuando parpadean en rojo, ya es tarde.»',
+      '«Las barrenas llevan el ritmo de algo. Como un corazón muy grande y muy lento.»',
     ],
   },
   // 6 · La báscula
   {
     name: 'La báscula',
-    line: 'Aquí se pesaba el mineral. Ahora el peso abre caminos.',
+    line: 'Aquí se pesaba el mineral. Ahora pesa otra cosa.',
     grid: [
       '##############################',
       '##############################',
@@ -280,13 +287,13 @@ export const levels: Level[] = [
       { kind: 'spikes', x: 13, y: 4, w: 3, period: 150, up: 50, warn: 30 },
     ],
     notes: [
-      '«La báscula abre las compuertas si pesa lo de una vagoneta llena. Una persona no basta.»',
+      '«La báscula marca peso cuando no hay nada encima. Mucho peso.» — J.',
     ],
   },
   // 7 · El montacargas
   {
     name: 'El montacargas',
-    line: 'Alguien tiene que tirar de la palanca.',
+    line: 'Alguien tiene que tirar de la palanca. Alguien que no seas tú.',
     grid: [
       '##############################',
       '##############################',
@@ -316,13 +323,13 @@ export const levels: Level[] = [
       { kind: 'platform', x: 1, y: 12.625, w: 2, path: [[0, 0], [0, -4]], speed: 0.5, wait: 80 },
     ],
     notes: [
-      '«El montacargas sube si alguien se queda abajo con la palanca. Nadie se quedó.»',
+      '«Si subes, no mires la cuerda del montacargas. No está atada a nada.» — J.',
     ],
   },
   // 8 · El filón
   {
     name: 'El filón',
-    line: 'Oro. Tanto oro. Y nadie para llevárselo.',
+    line: 'Oro. Tanto oro. Y nadie vivo para llevárselo.',
     grid: [
       '##############################',
       '##############################',
@@ -350,14 +357,14 @@ export const levels: Level[] = [
       { kind: 'platform', x: 6, y: 5, w: 2, path: [[0, 0], [17, 0]], speed: 0.8, wait: 30 },
     ],
     notes: [
-      '«Llevaba los bolsillos llenos de pepitas. Pesaban demasiado para trepar.»',
-      '«El filón madre está más abajo. Mucho más abajo. Lo oímos cantar.»',
+      '«El filón madre está más abajo. Lo oímos cantar. Cantaba con nuestras voces.»',
+      '«Llevaba los bolsillos llenos de pepitas. También la boca.»',
     ],
   },
   // 9 · El pozo de ventilación
   {
     name: 'El pozo de ventilación',
-    line: 'Si sopla aire, hay salida.',
+    line: 'Si sopla aire, hay salida. Si respira, no.',
     grid: [
       '##############################',
       '###..........................#',
@@ -386,13 +393,13 @@ export const levels: Level[] = [
       { kind: 'platform', x: 19, y: 5, w: 2, path: [[0, 0], [4, 0]], speed: 0.6, wait: 50, light: true },
     ],
     notes: [
-      '«Sopla aire de arriba. Huele a lluvia. Estamos cerca, Julián, estamos cerca.»',
+      '«Sopla aire de arriba. No es aire. Es algo que respira desde la boca de la mina.» — J.',
     ],
   },
   // 10 · La galería sellada
   {
     name: 'La galería sellada',
-    line: 'La última puerta. Al otro lado, voces.',
+    line: 'La galería está sellada. Desde fuera.',
     grid: [
       '##############################',
       '##############################',
@@ -423,8 +430,376 @@ export const levels: Level[] = [
       { kind: 'platform', x: 10, y: 5, w: 2, path: [[0, 0], [4, 0]], speed: 0.6, wait: 50, light: true },
     ],
     notes: [
-      '«La compuerta de abajo solo baja el puente con peso. Usad la vagoneta.»',
-      '«La palanca abre la galería sellada. Al otro lado se oyen voces. Pero no suben: bajan.»',
+      '«Ventura selló la mina por fuera, a propósito. “Mejor cuarenta que el pueblo entero”, dijo.»',
+      '«La compuerta sube el puente con peso. Usad la vagoneta. Y no os quedéis quietos mucho rato.»',
+    ],
+  },
+  // 11 · Los pozos viejos
+  {
+    name: 'Los pozos viejos',
+    line: 'La única salida es hacia abajo. Por donde vino el canto.',
+    dark: 40,
+    grid: [
+      '##############################',
+      '##############################',
+      '#............................#',
+      '#................##..........#',
+      '#.PL..........C..##...G......#',
+      '##########..##############..##',
+      '##########^^##############..##',
+      '##########################..##',
+      '#............................#',
+      '#.......................M....#',
+      '#....G.......................#',
+      '##..####.===.######..#########',
+      '##..####^^^^^######^^#########',
+      '##..##########################',
+      '#............................#',
+      '#...........................S#',
+      '#..............C............S#',
+      '####################..########',
+      '####################^^########',
+      '##############################',
+    ],
+    movers: [
+      { kind: 'spikes', x: 12, y: 16, w: 3, period: 150, up: 50, warn: 30 },
+    ],
+    notes: [
+      '«Bajamos a buscar a los que faltaban. Volvimos menos. Siempre volvemos menos.»',
+      '«Le vi la cara a la sombra. Era la cara de mi hermano. Mi hermano murió en el 19.» — J.',
+    ],
+  },
+  // 12 · La capilla
+  {
+    name: 'La capilla',
+    line: 'Los viejos decían que la mina no se llamaba así por la capilla del pueblo.',
+    dark: 38,
+    grid: [
+      '##############################',
+      '##############################',
+      '#............................#',
+      '#............................#',
+      '#.P.................G........#',
+      '############..#############H##',
+      '############^^#############H##',
+      '#.......#.....#.....#........#',
+      '#.......#.....#.....#...M....#',
+      '#............................#',
+      '#...K.....##C.L.##...........#',
+      '##H###########################',
+      '##H###########################',
+      '##H###########################',
+      '#............................#',
+      '#.....M.....................S#',
+      '#........................G..S#',
+      '#######.====.#################',
+      '#######^^^^^^#################',
+      '##############################',
+    ],
+    movers: [
+      { kind: 'platform', x: 18, y: 14, w: 1, h: 3, path: [[0, 0], [0, -3]], speed: 1, trigger: 0 },
+      { kind: 'spikes', x: 22, y: 16, w: 3, period: 140, up: 50, warn: 28 },
+    ],
+    notes: [
+      '«Hay una capilla aquí abajo. Más vieja que la mina. Más vieja que el pueblo. El altar está mirando hacia abajo.»',
+    ],
+  },
+  // 13 · El osario
+  {
+    name: 'El osario',
+    line: 'Aquí abajo ya había muertos antes de que llegáramos.',
+    dark: 36,
+    grid: [
+      '##############################',
+      '##############################',
+      '#.........X..................#',
+      '#.........X....M.............#',
+      '#.P.T..C..X..G...............#',
+      '################..#######X####',
+      '################^^#######.####',
+      '#########################.####',
+      '#............................#',
+      '#............................#',
+      '#......G..............L.C....#',
+      '####X##########..#############',
+      '####.##########^^#############',
+      '####.#########################',
+      '#..............X.............#',
+      '#..............X......M.....S#',
+      '#..............X..G......C..S#',
+      '####################..########',
+      '####################^^########',
+      '##############################',
+    ],
+    movers: [
+      { kind: 'spikes', x: 19, y: 10, w: 3, period: 130, up: 50, warn: 25 },
+      { kind: 'spikes', x: 10, y: 10, w: 3, period: 130, up: 50, warn: 25, phase: 65 },
+      { kind: 'spikes', x: 8, y: 16, w: 4, period: 130, up: 50, warn: 25 },
+    ],
+    notes: [
+      '«Huesos. Cientos. Con cascos de cuero, de antes de la Compañía. Todos con la cabeza hacia la misma pared.»',
+      '«Si te sigue, no corras hacia la oscuridad. Corre hacia la luz. Siempre hacia la luz.» — J.',
+      '«No es una sombra. Es un agujero con forma de hombre.»',
+    ],
+  },
+  // 14 · Los murmullos
+  {
+    name: 'Los murmullos',
+    line: 'Las voces dicen tu nombre. Lo dicen bien.',
+    dark: 34,
+    grid: [
+      '##############################',
+      '##############################',
+      '#.......................######',
+      '#...............M.......######',
+      '#.PC.L..................######',
+      '#########...............######',
+      '#########...............######',
+      '#########.==............######',
+      '#########.......G.......######',
+      '#########......==.......######',
+      '#########............L..######',
+      '#...................##..######',
+      '#.......................######',
+      '#...............==......######',
+      '#...M...................######',
+      '#S..........==.....M....######',
+      '#S.G....................######',
+      '#########^^^^^^^^^^^^^^^######',
+      '##############################',
+      '##############################',
+    ],
+    notes: [
+      '«Contestad solo si os llaman por el apodo. El nombre de verdad lo sabe cualquiera.» — J.',
+    ],
+  },
+  // 15 · La galería romana
+  {
+    name: 'La galería romana',
+    line: 'Alguien excavó esto hace dos mil años. Y lo tapió por dentro.',
+    dark: 34,
+    grid: [
+      '##############################',
+      '##############################',
+      '#............................#',
+      '#.............M..............#',
+      '#.P..B..................C..G.#',
+      '#########__#########..########',
+      '####################..########',
+      '####################..########',
+      '#............................#',
+      '#.........M..................#',
+      '#.................G.....L....#',
+      '##H##.............############',
+      '##H##^^^^^^^^^^^^^############',
+      '##H###########################',
+      '#............................#',
+      '#...........................S#',
+      '#...C.....B.................S#',
+      '##############__##.......#####',
+      '##################^^^^^^^#####',
+      '##############################',
+    ],
+    movers: [
+      { kind: 'platform', x: 20, y: 5, w: 2, h: 1.0625, path: [[0, 0], [2, 0]], speed: 0.5, trigger: 0 },
+      { kind: 'platform', x: 6, y: 11, w: 2, path: [[0, 0], [10, 0]], speed: 0.7, wait: 40 },
+      { kind: 'platform', x: 18, y: 19, w: 7, path: [[0, 0], [0, -2]], speed: 0.5, trigger: 1 },
+      { kind: 'spikes', x: 26, y: 16, w: 2, period: 120, up: 45, warn: 25 },
+    ],
+    notes: [
+      '«En la pared hay letras latinas raspadas. Una palabra se repite: CANIT. “Canta”.»',
+      '«La trampilla de arriba solo se abre con peso. Él también pesa. Cuidado con dónde lo dejas pisar.» — J.',
+    ],
+  },
+  // 16 · El que canta
+  {
+    name: 'El que canta',
+    line: 'Por fin lo oyes de cerca. Tiene tu voz.',
+    dark: 30,
+    shade: 0.6,
+    grid: [
+      '##############################',
+      '##############################',
+      '#######......................#',
+      '#######...M...............M..#',
+      '#######.........C.....L....P.#',
+      '#######........###############',
+      '#######........###############',
+      '#######........###############',
+      '#######........###############',
+      '#######........###############',
+      '#######........###############',
+      '#..............###############',
+      '#..............###############',
+      '#..............###############',
+      '#........G.....###############',
+      '#S.M....===....###############',
+      '#S..CG.........###############',
+      '#######^^^^^^^^###############',
+      '##############################',
+      '##############################',
+    ],
+    movers: [
+      { kind: 'platform', x: 12, y: 5, w: 2, path: [[0, 0], [0, 10]], speed: 0.6, wait: 60, light: true },
+      { kind: 'spikes', x: 18, y: 4, w: 3, period: 130, up: 45, warn: 25 },
+    ],
+    notes: [
+      '«Aquí está. No tiene forma. Es el filón. Canta para que bajemos, y bajamos. Ventura lo sabía. Por eso cerró.» — J.',
+      '«Ya he estado aquí. Reconozco mi letra en las notas. No recuerdo haberlas escrito.»',
+    ],
+  },
+  // 17 · Sin luz
+  {
+    name: 'Sin luz',
+    line: 'Tu lámpara se apagó sola al pasar junto a él. Solo quedan bengalas.',
+    dark: 24,
+    lampOut: true,
+    grid: [
+      '##############################',
+      '##############################',
+      '#............................#',
+      '#S......M....................#',
+      '#S........G............F.....#',
+      '##############.===.########H##',
+      '##############^^^^^########H##',
+      '###########################H##',
+      '#..........................H.#',
+      '#...................M......H.#',
+      '#....F..................G..H.#',
+      '##H#######.===.###############',
+      '##H#######^^^^^###############',
+      '##H###########################',
+      '#.H..........................#',
+      '#.H.......M..................#',
+      '#.H...G.......C..........F.P.#',
+      '##################.===.#######',
+      '##################^^^^^#######',
+      '##############################',
+    ],
+    movers: [
+      { kind: 'spikes', x: 19, y: 10, w: 3, period: 140, up: 50, warn: 28 },
+    ],
+    notes: [
+      '«Cuando no veas nada, cuenta sus pasos. Da siete y se para. Da siete y se para.» — J.',
+    ],
+  },
+  // 18 · La cuerda
+  {
+    name: 'La cuerda',
+    line: 'Arriba. Siempre arriba. No mires abajo: algo sube detrás.',
+    dark: 30,
+    shade: 0.6,
+    grid: [
+      '##############################',
+      '##############################',
+      '##############################',
+      '#H....................M.....S#',
+      '#H............G.............S#',
+      '#H############################',
+      '#H############################',
+      '#H############################',
+      '#H############################',
+      '#H..M........................#',
+      '#H.G.....................C...#',
+      '######..........###########H##',
+      '######^^^^^^^^^^###########H##',
+      '###########################H##',
+      '###########################H##',
+      '#.......................M..H.#',
+      '#.P..C......L..........G...H.#',
+      '##############################',
+      '##############################',
+      '##############################',
+    ],
+    movers: [
+      { kind: 'spikes', x: 8, y: 16, w: 3, period: 130, up: 50, warn: 25 },
+      { kind: 'spikes', x: 17, y: 16, w: 3, period: 130, up: 50, warn: 25, phase: 65 },
+      { kind: 'platform', x: 6, y: 11, w: 2, path: [[0, 0], [8, 0]], speed: 0.7, wait: 40, light: true },
+      { kind: 'spikes', x: 20, y: 10, w: 3, period: 120, up: 45, warn: 25 },
+      { kind: 'spikes', x: 9, y: 4, w: 3, period: 120, up: 45, warn: 25 },
+      { kind: 'spikes', x: 17, y: 4, w: 3, period: 120, up: 45, warn: 25, phase: 60 },
+    ],
+    notes: [
+      '«La cuerda del montacargas baja hasta el filón. Algo tira de ella desde abajo, despacio, cada noche.»',
+      '«No te pares en las escaleras. Ahí es donde te alcanza.» — J.',
+    ],
+  },
+  // 19 · Las Ánimas
+  {
+    name: 'Las Ánimas',
+    line: 'Cuarenta hombres bajaron. Cuarenta sombras suben contigo.',
+    dark: 28,
+    shade: 0.62,
+    grid: [
+      '##############################',
+      '##############################',
+      '#............................#',
+      '#..............M............S#',
+      '#....K............C.....G...S#',
+      '##H#######........############',
+      '##H#######^^^^^^^^############',
+      '##H###########################',
+      '#.H..........................#',
+      '#.H...M.................M....#',
+      '#.H........C..........G..L...#',
+      '#############.==..==.######H##',
+      '#############^^^^^^^^######H##',
+      '###########################H##',
+      '#.......X..................H.#',
+      '#.......X...........M......H.#',
+      '#.P.TC..X..B.G.............H.#',
+      '###############__#.......#####',
+      '##################^^^^^^^#####',
+      '##############################',
+    ],
+    movers: [
+      { kind: 'platform', x: 26, y: 2, w: 1, h: 3, path: [[0, 0], [0, -3]], speed: 1, trigger: 0 },
+      { kind: 'platform', x: 18, y: 19, w: 7, path: [[0, 0], [0, -2]], speed: 0.5, trigger: 1 },
+      { kind: 'spikes', x: 7, y: 10, w: 3, period: 120, up: 45, warn: 25 },
+      { kind: 'platform', x: 10, y: 5, w: 2, path: [[0, 0], [6, 0]], speed: 0.7, wait: 40, light: true },
+      { kind: 'spikes', x: 21, y: 4, w: 3, period: 120, up: 45, warn: 25, phase: 60 },
+    ],
+    notes: [
+      '«Ventura. El capataz. Bajó a sellar el filón con dinamita y el filón lo selló a él.»',
+      '«Las sombras no son el monstruo. Son los que bajaron. Te siguen porque eres el único que sabe subir.»',
+      '«Si llegas arriba, no mires el nombre de la lápida.» — J.',
+    ],
+  },
+  // 20 · La boca
+  {
+    name: 'La boca',
+    line: 'Arriba se ve el cielo. Abajo, todo lo que viene detrás.',
+    dark: 26,
+    shade: 0.72,
+    grid: [
+      '##############################',
+      '###........................###',
+      '###.S......................###',
+      '###.S....G...G..........M..###',
+      '###########.===..L.........###',
+      '###.............###........###',
+      '###........................###',
+      '###.................===....###',
+      '###..M.....................###',
+      '###.........M...###........###',
+      '###........................###',
+      '###.................===....###',
+      '###........................###',
+      '###.............###..........#',
+      '###.......M...........C......#',
+      '###.................####.....#',
+      '###^^^^^^^^^^^^^^^.......LFP.#',
+      '##############################',
+      '##############################',
+      '##############################',
+    ],
+    movers: [
+      { kind: 'spikes', x: 16, y: 12, w: 3, period: 130, up: 40, warn: 25, phase: 65 },
+      { kind: 'spikes', x: 16, y: 8, w: 3, period: 130, up: 40, warn: 25 },
+      { kind: 'spikes', x: 6, y: 3, w: 2, period: 120, up: 40, warn: 25 },
+    ],
+    notes: [
+      '«Si lees esto, ya has subido antes. Y has vuelto a bajar. No subas, Julián.» — J.',
     ],
   },
 ];

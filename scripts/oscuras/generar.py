@@ -41,6 +41,12 @@ out = [head, 'export const levels: Level[] = [\n']
 for i, l in enumerate(mine.L):
     out.append(f'  // {i + 1} · {l.name}\n  {{\n')
     out.append(f'    name: {ts(l.name)},\n    line: {ts(l.line)},\n')
+    if l.dark:
+        out.append(f'    dark: {l.dark},\n')
+    if l.shade:
+        out.append(f'    shade: {l.shade},\n')
+    if l.lamp_out:
+        out.append('    lampOut: true,\n')
     out.append('    grid: [\n' + ''.join(f"      '{r}',\n" for r in l.rows()) + '    ],\n')
     if l.movers:
         out.append('    movers: [\n' + ''.join('      ' + ts(m) + ',\n' for m in l.movers) + '    ],\n')

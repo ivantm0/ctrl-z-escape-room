@@ -191,10 +191,10 @@
       </div>
       <div class="info">
         <p class="tag">Escape room 5 · Nuevo · Prototipo</p>
-        <h2>A Oscuras: la mina</h2>
+        <h2>A Oscuras: la mina de Las Ánimas</h2>
         <p>
-          1923. Una explosión de grisú sepulta la mina y tú, el aprendiz, despiertas a oscuras. Sube diez
-          galerías con una lámpara que se apaga, un pico, vagonetas y montacargas, entre los que no lo lograron.
+          1923. Cuarenta mineros quedan sepultados y tú despiertas a oscuras. Veinte galerías de terror con una
+          lámpara que se apaga, notas de los muertos y algo que te sigue a través de la roca.
         </p>
         <p class="status">Nuevo · Entrar →</p>
       </div>
