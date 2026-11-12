@@ -6,6 +6,18 @@
    */
   import { onDestroy } from 'svelte';
 
+  /** extra: botones de la Parte II (dinamita y sigilo) */
+  let { extra = false }: { extra?: boolean } = $props();
+
+  // Sigilo: un toque lo activa (mantiene Mayús pulsada) y otro lo quita
+  let sneak = $state(false);
+  function toggleSneak(e: PointerEvent) {
+    e.preventDefault();
+    sneak = !sneak;
+    send(sneak ? 'keydown' : 'keyup', 'Shift');
+    navigator.vibrate?.(8);
+  }
+
   type Btn = { key: string; label: string; name: string; cls: string };
 
   const MOVE: Btn[] = [
@@ -49,6 +61,7 @@
   onDestroy(() => {
     for (const key of held.values()) send('keyup', key);
     held.clear();
+    if (sneak) send('keyup', 'Shift');
   });
 </script>
 
@@ -72,6 +85,20 @@
   <div class="actions">
     {#each ACTIONS as b (b.key)}{@render button(b)}{/each}
   </div>
+  {#if extra}
+    <div class="extra">
+      <button
+        type="button"
+        class="small sneak"
+        class:on={sneak}
+        aria-label="Sigilo: andar sin hacer ruido"
+        aria-pressed={sneak}
+        onpointerdown={toggleSneak}
+        oncontextmenu={(e) => e.preventDefault()}>🤫</button
+      >
+      {@render button({ key: 'f', label: 'TNT', name: 'Encender dinamita', cls: 'small tnt' })}
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -136,6 +163,23 @@
   }
   .reset {
     grid-area: r;
+  }
+  /* Parte II: sigilo y dinamita, en una columna entre la cruceta y los botones */
+  .extra {
+    position: absolute;
+    left: 50%;
+    bottom: max(0.9rem, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    display: grid;
+    gap: 0.6rem;
+  }
+  .sneak.on {
+    background: rgb(120 200 140 / 0.6);
+    color: #120e0c;
+  }
+  .tnt {
+    font-size: 0.7rem;
+    background: rgb(179 20 28 / 0.6);
   }
   .flare {
     grid-area: q;

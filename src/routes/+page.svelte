@@ -13,8 +13,10 @@
   const village = MAPS.pueblo.flatMap((row) => [...row].map((ch) => SHADE[ch] ?? 0));
   import DoorArt from '$lib/components/DoorArt.svelte';
   import ChainLock from '$lib/components/ChainLock.svelte';
+  import { oscuras } from '$lib/oscuras/progress.svelte';
 
   onMount(() => {
+    oscuras.load();
     faraon.load();
     pixel.load();
     backstage.load();
@@ -25,6 +27,15 @@
   const bastidoresLocked = $derived(!pixel.ready || !pixel.s.end4);
   const backstageStatus = $derived(
     !backstage.ready || !backstage.s.intro ? 'Nuevo' : backstage.levelDone(6) ? 'Completado: partida guardada' : backstage.levelDone(5) && backstage.s.level === 5 ? 'Pantallas 1 a 5 superadas' : backstage.levelDone(4) && backstage.s.level === 4 ? 'Pantallas 1 a 4 superadas' : backstage.levelDone(3) && backstage.s.level === 3 ? 'Pantallas 1, 2 y 3 superadas' : backstage.levelDone(2) && backstage.s.level === 2 ? 'Pantallas 1 y 2 superadas' : `En curso · pantalla ${backstage.s.level}`
+  );
+  // A Oscuras: la Parte II se desbloquea al terminar la Parte I
+  // A Oscuras: una sola campaña de 100 niveles
+  const oscurasStatus = $derived(
+    !oscuras.ready || (oscuras.s.level === 0 && !oscuras.s.done)
+      ? 'Nuevo'
+      : oscuras.s.done
+        ? 'Juego completado'
+        : `En curso · nivel ${oscuras.s.level + 1} de 100`
   );
   const pixelStatus = $derived(
     !pixel.ready || !pixel.s.intro ? 'Nuevo' : pixel.s.end4 ? 'Juego completado' : pixel.s.end3 ? 'Mundos 1, 2 y 3 superados' : `En curso · mundo ${pixel.s.world}`
@@ -190,15 +201,16 @@
         </div>
       </div>
       <div class="info">
-        <p class="tag">Escape room 5 · Nuevo · Prototipo</p>
+        <p class="tag">Escape room 5 · Nuevo</p>
         <h2>A Oscuras: la mina de Las Ánimas</h2>
         <p>
-          1923. Cuarenta mineros quedan sepultados y tú despiertas a oscuras. Veinte galerías de terror con una
-          lámpara que se apaga, notas de los muertos y algo que te sigue a través de la roca.
+          1923. Cuarenta mineros quedan sepultados y tú despiertas a oscuras. Cien niveles de terror: bajas hasta
+          lo que canta, mueres, vuelves… y sales a comerte el mundo. Contiene canibalismo explícito.
         </p>
-        <p class="status">Nuevo · Entrar →</p>
+        <p class="status">{oscurasStatus} · Entrar →</p>
       </div>
     </a>
+
   </div>
 </main>
 

@@ -26,6 +26,15 @@ class Lvl:
         self.dark = None        # radio de la luz propia del jugador (px); menos = más oscuro
         self.shade = None       # velocidad de las sombras (px/fotograma)
         self.lamp_out = False   # al entrar, la lámpara se apaga
+        self.lever_time = None  # fotogramas que dura abierta una puerta de palanca (None = sin temporizador)
+        self.look = None        # 'grutas' = cuevas luminosas
+        self.pulse = None       # ciclo de los cristales que laten (* y +), en fotogramas
+        self.cinematic = None   # líneas de la escena al entrar
+        self.echo = None        # retraso del eco que repite tus pasos (fotogramas)
+        self.flood = None       # inundación: dict(from=fila, speed=px/f, delay=f, to=fila)
+        self.ventura = None     # cada cuántos fotogramas lanza dinamita Ventura
+        self.need = None        # Parte III: humanos que hay que comer para poder salir
+        self.hands = False      # Parte III: rompe la roca agrietada con las manos
 
     def carve(self, x0, y0, x1, y1, ch='.'):
         for y in range(y0, y1 + 1):
@@ -157,8 +166,9 @@ l.carve(1, 8, 28, 10)         # planta media
 l.carve(15, 11, 16, 11, '_')
 l.ladder(3, 5, 10)
 l.carve(1, 2, 28, 4)          # planta alta
-l.put(20, 4, 'K')
-# lectura: K (fila 4) = 0, placa media (fila 11) = 1, placa baja (fila 17) = 2
+l.put(26, 10, 'K')
+l.lever_time = 14 * 60
+# lectura: K (fila 10) = 0, placa media (fila 11) = 1, placa baja (fila 17) = 2
 l.movers += [
     dict(kind='platform', x=25, y=2, w=1, h=3, path=[[0, 0], [0, -3]], speed=1, trigger=0),
     dict(kind='platform', x=8, y=8, w=1, h=3, path=[[0, 0], [0, -3]], speed=1, trigger=1),
@@ -268,7 +278,8 @@ l.carve(3, 11, 6, 11, '^')
 for x in [3, 4]: l.put(x, 10, '=')
 l.ladder(2, 5, 9)
 l.carve(1, 2, 28, 4)          # planta alta
-l.put(22, 4, 'K')
+l.put(7, 9, 'K')
+l.lever_time = 13 * 60
 l.movers.append(dict(kind='platform', x=26, y=2, w=1, h=3, path=[[0, 0], [0, -3]], speed=1, trigger=0))
 l.carve(10, 5, 15, 5); l.carve(10, 6, 15, 6, '^')
 l.movers.append(dict(kind='platform', x=10, y=5, w=2, path=[[0, 0], [4, 0]], speed=0.6, wait=50, light=True))
@@ -369,6 +380,7 @@ corridor(l, 1, 28, 14, 16)
 l.carve(7, 17, 12, 17); l.carve(7, 18, 12, 18, '^')
 for x in (8, 9, 10, 11): l.put(x, 17, '=')
 l.put(4, 10, 'K')
+l.lever_time = 8 * 60
 l.movers += [
     dict(kind='platform', x=18, y=14, w=1, h=3, path=[[0, 0], [0, -3]], speed=1, trigger=0),
     dict(kind='spikes', x=22, y=16, w=3, period=140, up=50, warn=28),
@@ -552,6 +564,7 @@ l.ladder(2, 5, 10)
 corridor(l, 1, 28, 2, 4)
 pit(l, 10, 17, 5)
 l.put(5, 4, 'K')
+l.lever_time = 14 * 60
 # lectura: palanca (fila 4) = 0, placa (fila 17) = 1
 l.movers += [
     dict(kind='platform', x=26, y=2, w=1, h=3, path=[[0, 0], [0, -3]], speed=1, trigger=0),
@@ -598,12 +611,126 @@ l.notes = ['«Si lees esto, ya has subido antes. Y has vuelto a bajar. No subas,
 L.append(l)
 
 
+
+# ═════════════ Acto III: las grutas luminosas (21–25) ═════════════
+# Un respiro de la oscuridad: todo da luz. El reto pasa a ser el ritmo de los cristales,
+# las setas que lanzan y el agua quieta.
+
+# ───────────── 21 · La grieta ─────────────
+l = Lvl('La grieta', 'Al otro lado de la roca, algo brilla.')
+l.look = 'grutas'
+l.cinematic = [
+    'Una grieta en la roca. Al otro lado, algo brilla.',
+    'Por primera vez en días, Julián ve sus propias manos. Están negras de carbón. Y tiemblan.',
+    'Hongos, cristales, agua quieta. Todo da luz: una luz fría que no calienta.',
+    'Las sombras no te siguen hasta aquí. Eso debería tranquilizarte.',
+]
+l.carve(1, 1, 28, 17)
+for x in range(10, 22): l.put(x, 17, 'w')
+for (x0, x1, y, ch) in [(6, 8, 16, '#'), (10, 13, 14, '*'), (15, 17, 12, '#'), (19, 21, 10, '+'),
+                        (23, 26, 8, '#'), (19, 21, 6, '*'), (9, 17, 4, '#')]:
+    l.carve(x0, y, x1, y, ch)
+l.put(2, 17, 'P'); l.put(9, 2, 'S'); l.put(9, 3, 'S')
+l.put(16, 11, 'G'); l.put(13, 3, 'G')
+l.put(25, 7, 'C')
+l.notes = ['«Expedición Ferrer, 1880. Encontramos la salida. El agua refleja el cielo. Mañana subimos.»']
+L.append(l)
+
+# ───────────── 22 · El bosque de setas ─────────────
+l = Lvl('El bosque de setas', 'Las setas son blandas y calientes. Como si respiraran.')
+l.look = 'grutas'
+l.carve(1, 1, 28, 17)
+for x in range(8, 28): l.put(x, 17, '^')
+l.put(5, 18, 'Y')
+l.carve(7, 13, 9, 13, '#'); l.put(10, 13, 'Y')
+l.carve(12, 8, 14, 8, '#'); l.put(15, 8, 'Y')
+l.carve(17, 3, 28, 3, '#')
+l.put(2, 17, 'P'); l.put(28, 1, 'S'); l.put(28, 2, 'S')
+l.put(13, 7, 'G'); l.put(9, 12, 'G'); l.put(22, 2, 'G')
+l.put(8, 12, 'C')
+l.notes = ['«Ferrer, 1880. Las setas nos subieron hasta la segunda sala. Rodríguez dice que de noche se mueven.»']
+L.append(l)
+
+# ───────────── 23 · Cristales que laten ─────────────
+l = Lvl('Cristales que laten', 'La luz va y viene, como una respiración muy lenta.')
+l.look = 'grutas'
+l.pulse = 150
+l.carve(1, 1, 28, 16)
+l.carve(5, 17, 22, 17); l.carve(5, 18, 22, 18, '^')
+for (x0, ch) in [(5, '*'), (8, '+'), (11, '*'), (14, '+'), (17, '*'), (20, '+')]:
+    for x in range(x0, x0 + 3): l.put(x, 17, ch)
+l.put(27, 17, 'Y')
+l.carve(24, 12, 25, 12, '#')
+l.carve(1, 10, 22, 10, '#')
+for (x0, ch) in [(6, '*'), (9, '+'), (12, '*'), (15, '+')]:
+    for x in range(x0, x0 + 3): l.put(x, 10, ch)
+l.put(3, 10, 'Y')
+l.carve(5, 5, 27, 5, '#')
+for (x0, ch) in [(12, '+'), (15, '*'), (18, '+')]:
+    for x in range(x0, x0 + 3): l.put(x, 5, ch)
+l.put(1, 16, 'P'); l.put(27, 3, 'S'); l.put(27, 4, 'S')
+l.put(15, 16, 'G'); l.put(10, 9, 'G'); l.put(17, 4, 'G')
+l.put(23, 9, 'C')
+l.notes = ['«Los cristales laten al mismo ritmo que algo que está debajo. Ferrer dice que es el agua. No es el agua.»']
+L.append(l)
+
+# ───────────── 24 · El lago quieto ─────────────
+l = Lvl('El lago quieto', 'El agua refleja la gruta entera. Y a ti. Y a alguien a tu lado.')
+l.look = 'grutas'
+l.pulse = 140
+l.carve(1, 1, 28, 17)
+l.carve(3, 15, 26, 17, 'w')
+l.carve(1, 15, 2, 17, '#'); l.carve(27, 15, 28, 17, '#')
+for (x0, x1, ch) in [(5, 6, '#'), (8, 9, '*'), (11, 12, '+'), (16, 17, '#'), (19, 20, '*'), (22, 23, '+'), (25, 25, '#')]:
+    l.carve(x0, 15, x1, 15, ch)
+l.put(14, 15, 'Y')
+l.carve(13, 10, 15, 10, '#')
+l.ladder(28, 6, 14)
+l.carve(20, 6, 27, 6, '#')
+for (x0, ch) in [(16, '*'), (12, '+')]:
+    for x in range(x0, x0 + 3): l.put(x, 6, ch)
+l.carve(7, 6, 10, 6, '#')
+l.carve(1, 4, 5, 4, '#')
+l.put(1, 14, 'P'); l.put(1, 2, 'S'); l.put(1, 3, 'S')
+l.put(14, 9, 'G'); l.put(24, 5, 'G'); l.put(3, 3, 'G')
+l.put(26, 5, 'C'); l.put(8, 5, 'C')
+l.notes = [
+    '«Ferrer. Se quedó mirando el agua toda la noche. Decía que en el reflejo éramos cuarenta y uno.»',
+    '«No mires el lago. El de la orilla de enfrente no es tu reflejo. Ya no.» — J.',
+]
+L.append(l)
+
+# ───────────── 25 · La luz de arriba ─────────────
+l = Lvl('La luz de arriba', 'Allí arriba, por fin, luz de día. De verdad.')
+l.look = 'grutas'
+l.pulse = 140
+l.carve(1, 1, 28, 17)
+for x in list(range(1, 10)) + list(range(20, 29)): l.put(x, 17, 'w')
+l.carve(10, 18, 19, 18, '#')
+l.put(11, 18, 'Y'); l.put(18, 18, 'Y')
+l.carve(6, 13, 9, 13, '#'); l.put(6, 13, 'Y')
+l.carve(20, 13, 23, 13, '#')
+l.carve(2, 8, 4, 8, '#')
+for (x0, ch) in [(7, '+'), (11, '*')]:
+    for x in range(x0, x0 + 3): l.put(x, 8, ch)
+l.carve(15, 8, 17, 8, '#')
+l.ladder(17, 3, 7)
+l.carve(12, 3, 18, 3, '#'); l.put(17, 3, 'H')
+l.carve(1, 0, 28, 0, '#')
+l.put(14, 17, 'P'); l.put(14, 1, 'S'); l.put(14, 2, 'S')
+l.put(22, 12, 'G'); l.put(3, 7, 'G'); l.put(12, 2, 'G')
+l.put(21, 12, 'C')
+l.notes = ['«Aquí acaba el diario de Ferrer. La última línea está escrita con otra letra: la tuya.» — J.']
+L.append(l)
+
+
 # ═════════════ Comprobador ═════════════
 
 def check(l, verbose=False):
     g = l.rows()
     assert len(g) == H and all(len(r) == W for r in g), 'tamaño'
-    have_pick = have_lamp = False
+    have_pick = getattr(l, 'hands', False)  # Parte III: rompe la roca con las manos
+    have_lamp = have_dyn = False
     import math
     plat_cells = set()   # no se usa: las plataformas no son sólidas en el modelo
     rides = []           # por plataforma: casillas donde se puede ir montado
@@ -637,10 +764,13 @@ def check(l, verbose=False):
                 return True
             if (x, y) in l.extra_floor:
                 return True
-            return c == '#' or (c == 'X' and not have_pick) or (c == '=' and have_lamp)  # M (sombra) = hueco
+            # M, U, A (enemigos) y ~ (grisú) cuentan como hueco; % (tablas), R (cristal),
+            # Y (seta) y * + (cristales que laten: se asume esperar a que se enciendan) como suelo
+            return (c in '#R%Y*+n' or (c == 'X' and not (have_pick or have_dyn)) or (c == 'W' and not have_dyn)
+                    or (c == '=' and have_lamp))
 
         def deadly(x, y):
-            return 0 <= y < H and 0 <= x < W and g[y][x] == '^'
+            return 0 <= y < H and 0 <= x < W and g[y][x] in '^wf'
 
         def ladder(x, y):
             return 0 <= y < H and 0 <= x < W and g[y][x] == 'H'
@@ -664,8 +794,8 @@ def check(l, verbose=False):
             # Altura libre que necesita el arco: medido en el juego, con 2 filas libres
             # sobre la cabeza el salto horizontal llega a 2 casillas; para 3 hacen falta 3
             dx = abs(tx - x)
-            if ty - y == -2:
-                need = 0
+            if ty - y <= -2:
+                need = 0   # saltos hacia arriba (y supersaltos de seta): basta el ápice
             else:
                 need = 1 if dx <= 1 else 2
             top = min(y, ty)
@@ -698,7 +828,9 @@ def check(l, verbose=False):
                     nxt.append((x, y - 1))
                 if ladder(x, y + 1):
                     nxt.append((x, y + 1))
-            for dy in range(-2, 7):
+            # Sobre una seta el salto llega hasta 5 casillas más arriba
+            shroom = y + 1 < H and g[y + 1][x] == 'Y'
+            for dy in range(-5 if shroom else -2, 7):
                 lim = 2 if dy < 0 else 3 if dy == 0 else 4
                 for dx in range(-lim, lim + 1):
                     if dx == 0:
@@ -715,9 +847,10 @@ def check(l, verbose=False):
                     todo.append(n)
         cells = {g[y][x] for (x, y) in seen}
         np, nl = 'T' in cells or have_pick, 'L' in cells or 'F' in cells or have_lamp
-        if (np, nl) == (have_pick, have_lamp):
+        nd = 'D' in cells or have_dyn
+        if (np, nl, nd) == (have_pick, have_lamp, have_dyn):
             break
-        have_pick, have_lamp = np, nl
+        have_pick, have_lamp, have_dyn = np, nl, nd
 
     exit_ok = any(g[y][x] == 'S' for (x, y) in seen)
     gold_total = sum(r.count('G') for r in g)

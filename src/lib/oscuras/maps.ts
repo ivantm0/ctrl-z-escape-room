@@ -16,6 +16,20 @@
  * _  placa de presión (activa con jugador o vagoneta encima). Va en un hueco del suelo
  *    de 2 casillas: la vagoneta cae dentro y ya no se sale
  * K  palanca (E para alternar)
+ * *  +  cristales que laten: se encienden por turnos y solo son sólidos encendidos
+ * Y  seta: al pisarla te lanza muy alto
+ * w  agua: no mata a sangre, pero te devuelve al principio de la gruta
+ * O  polilla de luz: va hacia la lámpara y le chupa el aceite
+ * V  Ventura: te lanza dinamita; tocarle es morir; tu dinamita lo mata
+ * h  minero de la cuadrilla de rescate (Parte III): patrulla con lámpara y pico; su luz quema
+ * I  el cura (Parte III): quieto en el altar; su luz crece con cada vela encendida
+ * p  perro de Ventura (Parte III): te huele y muerde
+ * c  vela (Parte III): su luz quema; E para apagarla
+ * n  ventana encendida (Parte IV): sólida; su luz quema; E la revienta
+ * l  farola (Parte IV): su luz quema; E la tumba
+ * f  hoguera (Parte IV): quema muchísimo si la tocas
+ * v  vecino (Parte IV): si te ve, huye gritando y avisa a la Guardia Civil
+ * g  guardia civil (Parte IV): dispara a ti y a los de la horda
  * M  sombra: atraviesa la roca y te persigue; huye de la lámpara y de las bengalas. Tocarla es morir
  *
  * Elementos móviles (`movers`), en coordenadas de casilla (se admiten decimales):
@@ -79,6 +93,26 @@ export type Level = {
   dark?: number;
   /** Velocidad de las sombras, en px por fotograma (por defecto 0.5) */
   shade?: number;
+  /** Si existe, las palancas vuelven solas tras estos fotogramas (la puerta se cierra) */
+  leverTime?: number;
+  /** Aspecto: «grutas» = cuevas luminosas (casi sin oscuridad) */
+  look?: 'grutas' | 'pueblo' | 'campo' | 'ciudad';
+  /** Duración del ciclo de los cristales que laten (* y +), en fotogramas (por defecto 160) */
+  pulse?: number;
+  /** Escena de texto al entrar en la galería por primera vez */
+  cinematic?: string[];
+  /** Eco: una copia tuya repite tus pasos con este retraso, en fotogramas */
+  echo?: number;
+  /** Inundación: el agua sube desde la fila `from` hasta la fila `to`, a `speed` px por fotograma tras `delay` */
+  flood?: { from: number; speed: number; delay?: number; to?: number };
+  /** Cada cuántos fotogramas lanza Ventura un cartucho (por defecto 150) */
+  ventura?: number;
+  /** Parte III: humanos que hay que comer antes de poder salir */
+  need?: number;
+  /** Ambientación del nivel en la campaña: mina, abismo, Julián muerto o fuera de la mina */
+  theme?: 'mina' | 'abismo' | 'muerto' | 'pueblo';
+  /** Al salir: la falsa salida que explota (antes de caer al abismo) */
+  boom?: boolean;
   /** Al entrar, la lámpara que llevaras se apaga */
   lampOut?: boolean;
 };
@@ -258,18 +292,19 @@ export const levels: Level[] = [
   {
     name: 'La báscula',
     line: 'Aquí se pesaba el mineral. Ahora pesa otra cosa.',
+    leverTime: 840,
     grid: [
       '##############################',
       '##############################',
       '#............................#',
       '#...........................S#',
-      '#...................K..G....S#',
+      '#......................G....S#',
       '###H##########################',
       '###H##########################',
       '###H##########################',
       '#..H.........................#',
       '#..H.........................#',
-      '#..H..G.................B....#',
+      '#..H..G.................B.K..#',
       '###############__##########H##',
       '###########################H##',
       '###########################H##',
@@ -400,17 +435,18 @@ export const levels: Level[] = [
   {
     name: 'La galería sellada',
     line: 'La galería está sellada. Desde fuera.',
+    leverTime: 780,
     grid: [
       '##############################',
       '##############################',
       '#............................#',
       '#...........................S#',
-      '#..................C..K.G...S#',
+      '#..................C....G...S#',
       '##H#######......##############',
       '##H#######^^^^^^##############',
       '#.H..........................#',
       '#.H..........................#',
-      '#.H.G...................L....#',
+      '#.H.G..K................L....#',
       '###==..##..........#######H###',
       '###^^^^##^^^^^^^^^^#######H###',
       '##########################H###',
@@ -474,6 +510,7 @@ export const levels: Level[] = [
     name: 'La capilla',
     line: 'Los viejos decían que la mina no se llamaba así por la capilla del pueblo.',
     dark: 38,
+    leverTime: 480,
     grid: [
       '##############################',
       '##############################',
@@ -730,6 +767,7 @@ export const levels: Level[] = [
     line: 'Cuarenta hombres bajaron. Cuarenta sombras suben contigo.',
     dark: 28,
     shade: 0.62,
+    leverTime: 840,
     grid: [
       '##############################',
       '##############################',
@@ -800,6 +838,171 @@ export const levels: Level[] = [
     ],
     notes: [
       '«Si lees esto, ya has subido antes. Y has vuelto a bajar. No subas, Julián.» — J.',
+    ],
+  },
+  // 21 · La grieta
+  {
+    name: 'La grieta',
+    line: 'Al otro lado de la roca, algo brilla.',
+    look: 'grutas',
+    cinematic: [
+      'Una grieta en la roca. Al otro lado, algo brilla.',
+      'Por primera vez en días, Julián ve sus propias manos. Están negras de carbón. Y tiemblan.',
+      'Hongos, cristales, agua quieta. Todo da luz: una luz fría que no calienta.',
+      'Las sombras no te siguen hasta aquí. Eso debería tranquilizarte.',
+    ],
+    grid: [
+      '##############################',
+      '#............................#',
+      '#........S...................#',
+      '#........S...G...............#',
+      '#........#########...........#',
+      '#............................#',
+      '#..................***.......#',
+      '#........................C...#',
+      '#......................####..#',
+      '#............................#',
+      '#..................+++.......#',
+      '#...............G............#',
+      '#..............###...........#',
+      '#............................#',
+      '#.........****...............#',
+      '#............................#',
+      '#.....###....................#',
+      '#.P.......wwwwwwwwwwww.......#',
+      '##############################',
+      '##############################',
+    ],
+    notes: [
+      '«Expedición Ferrer, 1880. Encontramos la salida. El agua refleja el cielo. Mañana subimos.»',
+    ],
+  },
+  // 22 · El bosque de setas
+  {
+    name: 'El bosque de setas',
+    line: 'Las setas son blandas y calientes. Como si respiraran.',
+    look: 'grutas',
+    grid: [
+      '##############################',
+      '#...........................S#',
+      '#.....................G.....S#',
+      '#................#############',
+      '#............................#',
+      '#............................#',
+      '#............................#',
+      '#............G...............#',
+      '#...........###Y.............#',
+      '#............................#',
+      '#............................#',
+      '#............................#',
+      '#.......CG...................#',
+      '#......###Y..................#',
+      '#............................#',
+      '#............................#',
+      '#............................#',
+      '#.P.....^^^^^^^^^^^^^^^^^^^^.#',
+      '#####Y########################',
+      '##############################',
+    ],
+    notes: [
+      '«Ferrer, 1880. Las setas nos subieron hasta la segunda sala. Rodríguez dice que de noche se mueven.»',
+    ],
+  },
+  // 23 · Cristales que laten
+  {
+    name: 'Cristales que laten',
+    line: 'La luz va y viene, como una respiración muy lenta.',
+    look: 'grutas',
+    pulse: 150,
+    grid: [
+      '##############################',
+      '#............................#',
+      '#............................#',
+      '#..........................S.#',
+      '#................G.........S.#',
+      '#....#######+++***+++#######.#',
+      '#............................#',
+      '#............................#',
+      '#............................#',
+      '#.........G............C.....#',
+      '###Y##***+++***+++#####......#',
+      '#............................#',
+      '#.......................##...#',
+      '#............................#',
+      '#............................#',
+      '#............................#',
+      '#P.............G.............#',
+      '#####***+++***+++***+++####Y##',
+      '#####^^^^^^^^^^^^^^^^^^#######',
+      '##############################',
+    ],
+    notes: [
+      '«Los cristales laten al mismo ritmo que algo que está debajo. Ferrer dice que es el agua. No es el agua.»',
+    ],
+  },
+  // 24 · El lago quieto
+  {
+    name: 'El lago quieto',
+    line: 'El agua refleja la gruta entera. Y a ti. Y a alguien a tu lado.',
+    look: 'grutas',
+    pulse: 140,
+    grid: [
+      '##############################',
+      '#............................#',
+      '#S...........................#',
+      '#S.G.........................#',
+      '######.......................#',
+      '#.......C...............G.C..#',
+      '#......####.+++.***.########H#',
+      '#...........................H#',
+      '#...........................H#',
+      '#.............G.............H#',
+      '#............###............H#',
+      '#...........................H#',
+      '#...........................H#',
+      '#...........................H#',
+      '#P..........................H#',
+      '###ww##w**w++wYw##w**w++w#w###',
+      '###wwwwwwwwwwwwwwwwwwwwwwww###',
+      '###wwwwwwwwwwwwwwwwwwwwwwww###',
+      '##############################',
+      '##############################',
+    ],
+    notes: [
+      '«Ferrer. Se quedó mirando el agua toda la noche. Decía que en el reflejo éramos cuarenta y uno.»',
+      '«No mires el lago. El de la orilla de enfrente no es tu reflejo. Ya no.» — J.',
+    ],
+  },
+  // 25 · La luz de arriba
+  {
+    name: 'La luz de arriba',
+    line: 'Allí arriba, por fin, luz de día. De verdad.',
+    look: 'grutas',
+    pulse: 140,
+    grid: [
+      '##############################',
+      '#.............S..............#',
+      '#...........G.S..............#',
+      '#...........#####H#..........#',
+      '#................H...........#',
+      '#................H...........#',
+      '#................H...........#',
+      '#..G.............H...........#',
+      '#.###..+++.***.###...........#',
+      '#............................#',
+      '#............................#',
+      '#............................#',
+      '#....................CG......#',
+      '#.....Y###..........####.....#',
+      '#............................#',
+      '#............................#',
+      '#............................#',
+      '#wwwwwwwww....P.....wwwwwwwww#',
+      '###########Y######Y###########',
+      '##############################',
+    ],
+    notes: [
+      '«Aquí acaba el diario de Ferrer. La última línea está escrita con otra letra: la tuya.» — J.',
     ],
   },
 ];
